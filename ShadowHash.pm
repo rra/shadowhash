@@ -1,22 +1,21 @@
 # Tie::ShadowHash -- Merge multiple data sources into a hash.  -*- perl -*-
 # $Id$
 #
-# Copyright 1999 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2002 by Russ Allbery <rra@stanford.edu>
 #
-# This program is free software; you can redistribute it and/or modify it
+# This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
 #
 # This module combines multiple sources of data into a single tied hash, so
 # that they can all be queried simultaneously, the source of any given
 # key-value pair irrelevant to the client script.  Data sources are searched
 # in the order that they're added to the shadow hash.  Changes to the hashed
-# data aren't propagated back to the actual data files; instead, they're
-# saved within the tied hash and override any data obtained from the data
-# sources.
+# data aren't propagated back to the actual data files; instead, they're saved
+# within the tied hash and override any data obtained from the data sources.
 
-############################################################################
+##############################################################################
 # Modules and declarations
-############################################################################
+##############################################################################
 
 package Tie::ShadowHash;
 require 5.003;
@@ -24,21 +23,24 @@ require 5.003;
 use strict;
 use vars qw($VERSION);
 
-# The version of this module is its CVS revision.
-($VERSION = (split (' ', q$Revision$ ))[1]) =~ s/\.(\d)$/.0$1/;
+# Don't use the CVS revision as the version, since too many things could munge
+# CVS magic revision strings, but this version should match the CVS revision.
+$VERSION = 0.07;
 
-
-############################################################################
+##############################################################################
 # Regular methods
-############################################################################
+##############################################################################
 
 # This should pretty much never be called; tie calls TIEHASH.
-sub new { my $class = shift; $class->TIEHASH (@_) }
+sub new {
+    my $class = shift;
+    $class->TIEHASH (@_)
+}
 
 # Given a file name and optionally a split regex, builds a hash out of the
 # contents of the file.  If the split sub exists, use it to split each line
-# into an array; if the array has two elements, those are taken as the key
-# and value.  If there are more, the value is an anonymous array containing
+# into an array; if the array has two elements, those are taken as the key and
+# value.  If there are more, the value is an anonymous array containing
 # everything but the first.  If there's no split sub, take the entire line
 # modulo the line terminator as the key and the value the number of times it
 # occurs in the file.
@@ -63,11 +65,10 @@ sub text_source {
     return \%hash;
 }
 
-# Add data sources to the shadow hash.  This takes a list of either
-# anonymous arrays (in which case the first element is the type of source
-# and the rest are arguments), filenames (in which case it's taken to be a
-# text file with each line being a key), or hash references (possibly to
-# tied hashes).
+# Add data sources to the shadow hash.  This takes a list of either anonymous
+# arrays (in which case the first element is the type of source and the rest
+# are arguments), filenames (in which case it's taken to be a text file with
+# each line being a key), or hash references (possibly to tied hashes).
 sub add {
     my $self = shift;
     for (@_) {
@@ -88,18 +89,17 @@ sub add {
     1;
 }
 
-
-############################################################################
+##############################################################################
 # Tie methods
-############################################################################
+##############################################################################
 
 # DELETED is a hash holding all keys that have been deleted; it's checked
 # first on any access.  EACH is a pointer to the current structure being
-# traversed on an "each" of the shadow hash, so that they can all be
-# traversed in order.  OVERRIDE is a hash containing values set directly by
-# the user, which override anything in the shadow hash's underlying data
-# structures.  And finally, SOURCES is an array of the data structures (all
-# Perl hashes, possibly tied).
+# traversed on an "each" of the shadow hash, so that they can all be traversed
+# in order.  OVERRIDE is a hash containing values set directly by the user,
+# which override anything in the shadow hash's underlying data structures.
+# And finally, SOURCES is an array of the data structures (all Perl hashes,
+# possibly tied).
 sub TIEHASH {
     my $class = shift;
     $class = ref $class || $class;
@@ -157,8 +157,8 @@ sub EXISTS {
 }
 
 # We have to reset the each counter on all hashes.  For tied hashes, we call
-# FIRSTKEY directly because it's potentially more efficient than calling
-# keys on the hash.
+# FIRSTKEY directly because it's potentially more efficient than calling keys
+# on the hash.
 sub FIRSTKEY {
     my $self = shift;
     scalar keys %{$$self{OVERRIDE}};
@@ -170,8 +170,8 @@ sub FIRSTKEY {
     $self->NEXTKEY;
 }
 
-# Walk the sources by calling each on each one in turn, skipping deleted
-# keys and using $$self{EACH} to store the number of source we're at.
+# Walk the sources by calling each on each one in turn, skipping deleted keys
+# and using $$self{EACH} to store the number of source we're at.
 sub NEXTKEY {
     my $self = shift;
     my @result = ();
@@ -191,10 +191,9 @@ sub NEXTKEY {
     undef;
 }
 
-
-############################################################################
+##############################################################################
 # Module return value and documentation
-############################################################################
+##############################################################################
 
 # Make sure the module returns true.
 1;
@@ -304,7 +303,7 @@ only currently supported tagged data source is "text".
 
 =head1 CAVEATS
 
-It's worth paying B<very> careful attention to L<perltie/"The untie Gotcha">
+It's worth paying very careful attention to L<perltie/"The untie Gotcha">
 when using this module.  It's also important to be careful about what you do
 with tied hashes that are included in a shadow hash.  Tie::ShadowHash stores
 a reference to such arrays; if you untie them out from under a shadow hash,
@@ -331,8 +330,22 @@ all data sources are searched in order and the value returned by an access
 is the first value found.  (Tie::ShadowHash does correctly handle undefined
 values stored directly in the shadow hash.)
 
+=head1 SEE ALSO
+
+L<perltie>
+
+The current version of this module is available from its web site at
+L<http://www.eyrie.org/~eagle/software/shadowhash/>.
+
 =head1 AUTHOR
 
-Russ Allbery E<lt>rra@stanford.eduE<gt>.
+Russ Allbery <rra@stanford.edu>.
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1999, 2002 by Russ Allbery <rra@stanford.edu>
+
+This program is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =cut
