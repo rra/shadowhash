@@ -93,6 +93,13 @@ sub add {
 # Tie methods
 ############################################################################
 
+# DELETED is a hash holding all keys that have been deleted; it's checked
+# first on any access.  EACH is a pointer to the current structure being
+# traversed on an "each" of the shadow hash, so that they can all be
+# traversed in order.  OVERRIDE is a hash containing values set directly by
+# the user, which override anything in the shadow hash's underlying data
+# structures.  And finally, SOURCES is an array of the data structures (all
+# Perl hashes, possibly tied).
 sub TIEHASH {
     my $class = shift;
     $class = ref $class || $class;
@@ -107,6 +114,10 @@ sub TIEHASH {
     $self;
 }
 
+# Note that this doesn't work quite right in the case of keys with undefined
+# values, but we can't make it work right since that would require using
+# exists and a lot of common data sources (such as NDBM_File tied hashes)
+# don't implement exists.
 sub FETCH {
     my ($self, $key) = @_;
     return if $$self{DELETED}{$key};
@@ -134,6 +145,8 @@ sub CLEAR {
     $$self{EACH} = -1;
 }
 
+# This could throw an exception if any underlying source doesn't support
+# exists (like NDBM_File or SDBM_File without my patch).
 sub EXISTS {
     my ($self, $key) = @_;
     return if exists $$self{DELETED}{$key};
@@ -143,6 +156,9 @@ sub EXISTS {
     undef;
 }
 
+# We have to reset the each counter on all hashes.  For tied hashes, we call
+# FIRSTKEY directly because it's potentially more efficient than calling
+# keys on the hash.
 sub FIRSTKEY {
     my $self = shift;
     scalar keys %{$$self{OVERRIDE}};
@@ -154,6 +170,8 @@ sub FIRSTKEY {
     $self->NEXTKEY;
 }
 
+# Walk the sources by calling each on each one in turn, skipping deleted
+# keys and using $$self{EACH} to store the number of source we're at.
 sub NEXTKEY {
     my $self = shift;
     my @result = ();
@@ -163,6 +181,7 @@ sub NEXTKEY {
         } else {
             @result = each %{$$self{SOURCES}[$$self{EACH}]};
         }
+        next if $$self{DELETED}{$result[0]};
         return (wantarray ? @result : $result[0]) if @result;
         $$self{EACH}++;
     }
