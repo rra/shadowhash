@@ -7,4 +7,6 @@ TODO
 test.pl
 test/first.txt
 test/full
+test/pairs.txt
 test/second.txt
+test/triples.txt

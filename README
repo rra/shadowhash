@@ -1,9 +1,9 @@
-                       Tie::ShadowHash version 0.6
+                       Tie::ShadowHash version 0.7
                 (Merge multiple data sources into a hash)
 
-  Copyright 1999 by Russ Allbery <rra@stanford.edu>.  This program is
-  free software; you may redistribute it and/or modify it under the same
-  terms as Perl itself.
+  Copyright 1999, 2002 by Russ Allbery <rra@stanford.edu>.  This program
+  is free software; you may redistribute it and/or modify it under the
+  same terms as Perl itself.
 
 
 INTRODUCTION
@@ -62,7 +62,7 @@ CONTACTING ME
   an idea of what I already have planned.
 
   Please allow at least a month for me to respond to mail regarding this
-  module.  I get at *least* 500 mail messages a day, and I'm afraid this
+  module.  I get at least 1,000 mail messages a day, and I'm afraid this
   module is something that I only get a chance to work on once every few
   months.  I do intend to continue to maintain it, however, and I will get
   back to you eventually.

@@ -1,64 +1,70 @@
-Wed Jun  2 22:59:29 1999  Russ Allbery  <eagle@windlord.stanford.edu>
+2002-07-27  Russ Allbery  <rra@stanford.edu>
 
-        * README: Tie::ShadowHash 0.6 released.
+	* ShadowHash.pm: Add SEE ALSO and COPYRIGHT AND LICENSE sections
+	to the documentation.  Reformat for current formatting style.
 
-        * ShadowHash.pm: Added documentation of tagged data sources and of
-        the "text" tagged data source in particular, as well as some
-        examples, now that this has been verified as already working.
+1999-06-02  Russ Allbery  <rra@stanford.edu>
 
-        * test.pl: Added tests for special text data sources that take a
-        filename and a sub that returns a list of key and one or more
-        values.
+	* README: Tie::ShadowHash 0.6 released.
 
-        * test/pairs.txt: New file.
-        test/triples.txt: New file.
+	* ShadowHash.pm: Added documentation of tagged data sources and of
+	the "text" tagged data source in particular, as well as some
+	examples, now that this has been verified as already working.
 
-Sat Apr  3 15:48:58 1999  Russ Allbery  <eagle@windlord.stanford.edu>
+	* test.pl: Added tests for special text data sources that take a
+	filename and a sub that returns a list of key and one or more
+	values.
 
-        * README: Tie::ShadowHash 0.5 released.
+	* test/pairs.txt: New file.
+	* test/triples.txt: New file.
 
-        * ShadowHash.pm: Fixed NEXTKEY again; it was skipping over too
-        much of the source when it hit a deleted key.
+1999-04-03  Russ Allbery  <rra@stanford.edu>
 
-        * test.pl: Added a test to ensure that deleted keys don't show up
-        in the keys of the shadow hash.
+	* README: Tie::ShadowHash 0.5 released.
 
-        * ShadowHash.pm: Added some comments to the tied hash section of
-        the code, fixed a bug in NEXTKEY where it didn't skip past entries
-        that had been deleted.
+	* ShadowHash.pm: Fixed NEXTKEY again; it was skipping over too
+	much of the source when it hit a deleted key.
 
-        * test.pl: Switched from using SDBM_File to using AnyDBM_File
-        since for some reason SDBM isn't built on the Mac port.  Also
-        switched to building the DBM on the fly before running any tests,
-        since a lot of DBMs (including SDBM) are byte-order-dependent.
+	* test.pl: Added a test to ensure that deleted keys don't show up
+	in the keys of the shadow hash.
 
-        * test/first.txt: New file.
-        test/first.dir: Removed.
-        test/first.pag: Removed.
+	* ShadowHash.pm: Added some comments to the tied hash section of
+	the code, fixed a bug in NEXTKEY where it didn't skip past entries
+	that had been deleted.
 
-Mon Mar 22 05:22:49 1999  Russ Allbery  <eagle@windlord.stanford.edu>
+	* test.pl: Switched from using SDBM_File to using AnyDBM_File
+	since for some reason SDBM isn't built on the Mac port.  Also
+	switched to building the DBM on the fly before running any tests,
+	since a lot of DBMs, including SDBM, are byte-order-dependent.
 
-        * README: Tie::ShadowHash 0.3 released.
+	* test/first.txt: New file.
+	* test/first.dir: Removed.
+	* test/first.pag: Removed.
 
-        * TODO: New file.
+1999-03-22  Russ Allbery  <rra@stanford.edu>
 
-        * ShadowHash.pm: [Revision 0.3] Added documentation.
+	* README: Tie::ShadowHash 0.3 released.
 
-        * test/first.dir: New file.
-        test/first.pag: New file.
-        test/full: New file.
-        test/second.txt: New file.
+	* TODO: New file.
 
-        * test.pl: New file.
+	* ShadowHash.pm: [Revision 0.3] Added documentation.
 
-        * Makefile.PL: New file.
+	* test/first.dir: New file.
+	* test/first.pag: New file.
+	* test/full: New file.
+	* test/second.txt: New file.
 
-        * ShadowHash.pm: [Revision 0.2] Don't use exists when finding a
-        key in the databases, since some tied databases can't handle it
-        (ODBM, NDBM, SDBM without my patch).  This means that keys with
-        undefined values don't correctly override later identical keys
-        with defined values.  *sigh* Also, make add() return true.
+	* test.pl: New file.
 
-Sun Mar 21 03:47:21 1999  Russ Allbery  <eagle@windlord.stanford.edu>
+	* Makefile.PL: New file.
 
-        * ShadowHash.pm: [Revision 0.1] New file.
+	* ShadowHash.pm: [Revision 0.2] Don't use exists when finding a
+	key in the databases, since some tied databases can't handle it
+	such as ODBM, NDBM, and SDBM without my patch.  This means that
+	keys with undefined values don't correctly override later
+	identical keys with defined values.  *sigh*  Also, make add()
+	return true.
+
+1999-03-21  Russ Allbery  <rra@stanford.edu>
+
+	* ShadowHash.pm: [Revision 0.1] New file.
