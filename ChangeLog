@@ -1,3 +1,18 @@
+Wed Jun  2 22:59:29 1999  Russ Allbery  <eagle@windlord.stanford.edu>
+
+        * README: Tie::ShadowHash 0.6 released.
+
+        * ShadowHash.pm: Added documentation of tagged data sources and of
+        the "text" tagged data source in particular, as well as some
+        examples, now that this has been verified as already working.
+
+        * test.pl: Added tests for special text data sources that take a
+        filename and a sub that returns a list of key and one or more
+        values.
+
+        * test/pairs.txt: New file.
+        test/triples.txt: New file.
+
 Sat Apr  3 15:48:58 1999  Russ Allbery  <eagle@windlord.stanford.edu>
 
         * README: Tie::ShadowHash 0.5 released.

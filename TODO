@@ -5,11 +5,6 @@ of this as fast as I'd like.  If you'd like to implement anything on this
 list, drop me a line first at rra@stanford.edu and then have at it!
 Credits will be noted in the README.
 
- * Support for passing in a sub to add (or the constructor) associated
-   with a text file that splits each line into a key and values
-   theoretically already exists, but I haven't tested it at *all* yet and
-   it isn't documented.
-
  * A way of removing a specific source from the shadow hash might be nice,
    but we'd have to solve the naming problem.
 
