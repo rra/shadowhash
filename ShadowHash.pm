@@ -223,6 +223,19 @@ Tie::ShadowHash - Merge multiple data sources into a hash
     %extra = (fee => 'fi', foe => 'fum');
     $obj->add (\%extra);
 
+    # Add a text file as a data source, taking the first "word" up
+    # to whitespace on each line as the key and the rest of the line
+    # as the value.
+    $split = sub { split (' ', $_[0], 2) };
+    $obj->add ([text => "pairs.txt", $split]);
+
+    # Add a text file as a data source, splitting each line on
+    # whitespace and taking the first "word" to be the key and an
+    # anonymous array consisting of the remaining words to be the
+    # data.
+    $split = sub { split (' ', $_[0]) };
+    $obj->add ([text => "triples.txt", $split]);
+
 =head1 DESCRIPTION
 
 This module merges together multiple sets of data in the form of hashes into
@@ -237,6 +250,22 @@ tied hashes, so you can include DB and DBM files as data sources for a
 shadow hash.  If given a plain file name instead of a reference, it will
 build a hash to use internally, with each chomped line of the file being the
 key and the number of times that line is seen in the file being the value.
+
+Tie::Shadowhash also supports special tagged data sources that can take
+options specifying their behavior.  The only tagged data source currently
+supported is "text", which takes a filename of a text file and a reference
+to a sub.  The sub is called for every line of the file, with that line as
+an argument, and is expected to return a list.  The first element of the
+list will be the key, and the second and subsequent elements will be the
+value or values.  If there is more than one value, the value stored in the
+hash and associated with that key is an anonymous array containing all of
+them.
+
+Tagged data sources are distinguished from normal data sources by passing
+them to tie() (or to add() -- see below) as an anonymous array.  The first
+element is the data source tag and the remaining elements are arguments
+for that data source.  For a text data source, see the usage summary above
+for examples.
 
 The shadow hash can be modified, and the modifications override the data
 sources, but modifications aren't propagated back to the data sources.  In
@@ -265,6 +294,11 @@ and interprets them in the same way.
 
 Tie::ShadowHash was given a file name to use as a source, but when it tried
 to open that file, the open failed with that system error message.
+
+=item Invalid source type %s
+
+Tie::Shadowhash was given a tagged data source of an unknown type.  The
+only currently supported tagged data source is "text".
 
 =back
 
