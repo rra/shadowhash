@@ -1,4 +1,4 @@
-                       Tie::ShadowHash version 0.3
+                       Tie::ShadowHash version 0.4
                 (Merge multiple data sources into a hash)
 
   Copyright 1999 by Russ Allbery <rra@stanford.edu>.  This program is
@@ -45,6 +45,14 @@ INSTALLATION
   You'll probably need to do the last as root.  If instead you wish to
   install the module by hand, simply copy it into a directory named Tie in
   your Perl library directory.
+
+
+THANKS
+
+  To Chris Nandor <pudge@pobox.com> for testing this module on the Mac,
+  pointing out that SDBM_File wasn't available there, mentioning that SDBM
+  was byte-order-dependent anyway, and suggesting using AnyDBM_File
+  instead.
 
 
 CONTACTING ME
