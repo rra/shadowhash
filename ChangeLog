@@ -1,6 +1,16 @@
 Sat Apr  3 15:48:58 1999  Russ Allbery  <eagle@windlord.stanford.edu>
 
-        * README: Tie::ShadowHash 0.4 released.
+        * README: Tie::ShadowHash 0.5 released.
+
+        * ShadowHash.pm: Fixed NEXTKEY again; it was skipping over too
+        much of the source when it hit a deleted key.
+
+        * test.pl: Added a test to ensure that deleted keys don't show up
+        in the keys of the shadow hash.
+
+        * ShadowHash.pm: Added some comments to the tied hash section of
+        the code, fixed a bug in NEXTKEY where it didn't skip past entries
+        that had been deleted.
 
         * test.pl: Switched from using SDBM_File to using AnyDBM_File
         since for some reason SDBM isn't built on the Mac port.  Also
