@@ -1,0 +1,60 @@
+                       Tie::ShadowHash version 0.3
+                (Merge multiple data sources into a hash)
+
+  Copyright 1999 by Russ Allbery <rra@stanford.edu>.  This program is
+  free software; you may redistribute it and/or modify it under the same
+  terms as Perl itself.
+
+
+INTRODUCTION
+
+  If you have a bunch of separate sources of data in the form of Perl
+  hashes, tied hashes (of whatever type, including on-disk databases tied
+  with DB_File, GDBM_File, or similar modules), or text files that you
+  want to turn into hashes, and you want to be able to query all of those
+  sources of data at once for a particular key without having to check
+  each one of them individually each time, this module is what you're
+  looking for.  If you want to use a hash-like data source, even just one,
+  but make modifications to its data over the course of your program that
+  override its contents while your program runs but which don't have any
+  permanent effect on it, then this module may be what you're looking for.
+
+  Tie::ShadowHash lets you create a "shadow hash" that looks like a
+  regular Perl hash to your program but behind the scenes queries a whole
+  list of data sources.  All the data sources underneath have to also
+  behave like Perl hashes, but that's the only constraint.  They can be
+  regular Perl hashes or other tied hashes, including tied DB_File or
+  GDBM_File hashes or the like to access on-disk databases.  All data
+  sources are treated as read-only; modifications to any data is stored in
+  the shadow hash itself, and subsequent accesses reflect any
+  modifications, but none of the data sources are changed.
+
+  See the POD documentation for complete details, features, and usage.
+
+
+INSTALLATION
+
+  Follow the standard installation procedure for Perl modules, which is to
+  type the following commands:
+
+          perl Makefile.PL
+          make
+          make test
+          make install
+
+  You'll probably need to do the last as root.  If instead you wish to
+  install the module by hand, simply copy it into a directory named Tie in
+  your Perl library directory.
+
+
+CONTACTING ME
+
+  Please send any comments, bug reports, feature requests, or patches to
+  rra@stanford.edu.  You may want to look over TODO before doing so to get
+  an idea of what I already have planned.
+
+  Please allow at least a month for me to respond to mail regarding this
+  module.  I get at *least* 500 mail messages a day, and I'm afraid this
+  module is something that I only get a chance to work on once every few
+  months.  I do intend to continue to maintain it, however, and I will get
+  back to you eventually.
