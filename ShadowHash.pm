@@ -85,6 +85,7 @@ sub add {
         }
         push (@{$$self{SOURCES}}, $source);
     }
+    1;
 }
 
 
@@ -110,7 +111,7 @@ sub FETCH {
     my ($self, $key) = @_;
     return if $$self{DELETED}{$key};
     for ($$self{OVERRIDE}, @{$$self{SOURCES}}) {
-        return $$_{$key} if exists $$_{$key};
+        return $$_{$key} if defined $$_{$key};
     }
     undef;
 }
