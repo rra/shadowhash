@@ -8,7 +8,7 @@ for (qw(./test ./t/test ../t/test)) { $data = $_ if -d $_ }
 unless ($data) { die "Cannot find test data directory\n" }
 
 # Print out the count of tests we'll be running.
-BEGIN { $| = 1; print "1..21\n" }
+BEGIN { $| = 1; print "1..22\n" }
 
 # 1 (ensure module can load, and generate DBM database)
 END { print "not ok 1\n" unless $loaded }
@@ -97,6 +97,14 @@ unless (join ("\0", @full) eq join ("\0", @keys)) {
     print 'not ';
 }
 print "ok 21\n";
+
+# 22 (make sure deleted keys are skipped)
+delete $hash{sg};
+my @keys = keys %hash;
+if (@keys != @full - 1 || grep { $_ eq 'sg' } @keys) {
+    print 'not ';
+}
+print "ok 22\n";
 
 # Clean up after ourselves (delete first* in $data except for first.txt).
 opendir (DATA, $data) or die "Can't open $data to clean up: $!\n";
