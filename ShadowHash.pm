@@ -181,7 +181,10 @@ sub NEXTKEY {
         } else {
             @result = each %{$$self{SOURCES}[$$self{EACH}]};
         }
-        next if $$self{DELETED}{$result[0]};
+        if (@result && $$self{DELETED}{$result[0]}) {
+            undef @result;
+            next;
+        }
         return (wantarray ? @result : $result[0]) if @result;
         $$self{EACH}++;
     }
