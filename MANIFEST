@@ -1,0 +1,9 @@
+ChangeLog
+MANIFEST
+Makefile.PL
+ShadowHash.pm
+test.pl
+test/first.dir
+test/first.pag
+test/full
+test/second.txt
