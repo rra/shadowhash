@@ -1,6 +1,8 @@
 # Makefile.PL for Tie::ShadowHash module  -*- perl -*-
 # $Id$
+
 use ExtUtils::MakeMaker;
+
 WriteMakefile (
     NAME         => 'Tie::ShadowHash',
     DISTNAME     => 'ShadowHash',
