@@ -8,7 +8,7 @@ for (qw(./test ./t/test ../t/test)) { $data = $_ if -d $_ }
 unless ($data) { die "Cannot find test data directory\n" }
 
 # Print out the count of tests we'll be running.
-BEGIN { $| = 1; print "1..22\n" }
+BEGIN { $| = 1; print "1..26\n" }
 
 # 1 (ensure module can load, and generate DBM database)
 END { print "not ok 1\n" unless $loaded }
@@ -91,6 +91,7 @@ print (!defined $hash{fooba} ? '' : 'not ', "ok 20\n");
 # 21 (compare a keys listing with the full data)
 open (FULL, "$data/full") or die "can't open $data/full: $!\n";
 my @full = sort <FULL>;
+close FULL;
 chomp @full;
 my @keys = sort keys %hash;
 unless (join ("\0", @full) eq join ("\0", @keys)) {
@@ -105,6 +106,55 @@ if (@keys != @full - 1 || grep { $_ eq 'sg' } @keys) {
     print 'not ';
 }
 print "ok 22\n";
+
+# 23 (special text sources with single values)
+%hash = ();
+$obj->add ([text => "$data/pairs.txt", sub { split (' ', $_[0], 2) }])
+    or print 'not ';
+print "ok 23\n";
+
+# 24 (check the data)
+open (FULL, "$data/pairs.txt") or die "can't open $data/pairs.txt: $!\n";
+my %full;
+while (<FULL>) {
+    chomp;
+    my ($key, $value) = split (' ', $_, 2);
+    $full{$key} = $value;
+}
+close FULL;
+if (keys (%full) != keys (%hash)) {
+    print 'not ';
+} else {
+    for (keys %hash) { print 'not ', last if $full{$_} ne $hash{$_} }
+}
+print "ok 24\n";
+
+# 25 (special text sources with list values)
+%hash = ();
+$obj->add ([text => "$data/triples.txt", sub { split (' ', $_[0]) }])
+    or print 'not ';
+print "ok 25\n";
+
+# 26 (check the data)
+open (FULL, "$data/triples.txt")
+    or die "can't open $data/triples.txt: $!\n";
+undef %full;
+while (<FULL>) {
+    chomp;
+    my ($key, @value) = split (' ', $_);
+    $full{$key} = [ @value ];
+}
+close FULL;
+if (keys (%full) != keys (%hash)) {
+    print 'not ';
+} else {
+    for (keys %hash) {
+        my $seen = join ("\1", @{$hash{$_}});
+        my $expected = join ("\1", @{$full{$_}});
+        print 'not ', last if $seen ne $expected;
+    }
+}
+print "ok 26\n";
 
 # Clean up after ourselves (delete first* in $data except for first.txt).
 opendir (DATA, $data) or die "Can't open $data to clean up: $!\n";
