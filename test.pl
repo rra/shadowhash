@@ -10,14 +10,28 @@ unless ($data) { die "Cannot find test data directory\n" }
 # Print out the count of tests we'll be running.
 BEGIN { $| = 1; print "1..21\n" }
 
-# 1 (ensure module can load)
+# 1 (ensure module can load, and generate DBM database)
 END { print "not ok 1\n" unless $loaded }
 use Tie::ShadowHash;
-use SDBM_File;
-use Fcntl qw(O_RDONLY);
+use AnyDBM_File;
+use Fcntl qw(O_CREAT O_RDONLY O_RDWR);
 $loaded = 1;
-print "ok 1\n";
 my (%hash, $obj);
+$obj = tie (%hash, 'AnyDBM_File', "$data/first", O_RDWR | O_CREAT, 0644);
+if ($obj) {
+    open (DATA, "$data/first.txt")
+        or die "Can't open $data/first.txt: $!\n";
+    while (<DATA>) {
+        chomp;
+        $hash{$_} = 1;
+    }
+    close DATA;
+    untie %hash;
+} else {
+    die $!;
+    print 'not ';
+}
+print "ok 1\n";
 
 # 2 (try tying just the text file)
 $obj = tie (%hash, 'Tie::ShadowHash', "$data/second.txt");
@@ -43,7 +57,7 @@ print ($hash{jp}    == 2   ? '' : 'not ', "ok 9\n");
 undef $obj;
 untie %hash;
 my %db;
-unless (tie (%db, 'SDBM_File', "$data/first", O_RDONLY, 0644)) {
+unless (tie (%db, 'AnyDBM_File', "$data/first", O_RDONLY, 0644)) {
     print 'not ';
 }
 print "ok 10\n";
@@ -83,3 +97,10 @@ unless (join ("\0", @full) eq join ("\0", @keys)) {
     print 'not ';
 }
 print "ok 21\n";
+
+# Clean up after ourselves (delete first* in $data except for first.txt).
+opendir (DATA, $data) or die "Can't open $data to clean up: $!\n";
+for (grep { /^first/ } readdir DATA) {
+    unlink "$data/$_" unless $_ eq 'first.txt';
+}
+closedir DATA;
