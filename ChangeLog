@@ -1,3 +1,26 @@
+Mon Mar 22 05:22:49 1999  Russ Allbery  <eagle@windlord.stanford.edu>
+
+        * README: Tie::ShadowHash 0.3 released.
+
+        * TODO: New file.
+
+        * ShadowHash.pm: [Revision 0.3] Added documentation.
+
+        * test/first.dir: New file.
+        test/first.pag: New file.
+        test/full: New file.
+        test/second.txt: New file.
+
+        * test.pl: New file.
+
+        * Makefile.PL: New file.
+
+        * ShadowHash.pm: [Revision 0.2] Don't use exists when finding a
+        key in the databases, since some tied databases can't handle it
+        (ODBM, NDBM, SDBM without my patch).  This means that keys with
+        undefined values don't correctly override later identical keys
+        with defined values.  *sigh* Also, make add() return true.
+
 Sun Mar 21 03:47:21 1999  Russ Allbery  <eagle@windlord.stanford.edu>
 
-	* ShadowHash.pm: [Revision 0.1] New file.
+        * ShadowHash.pm: [Revision 0.1] New file.
