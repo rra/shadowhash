@@ -1,3 +1,16 @@
+Sat Apr  3 15:48:58 1999  Russ Allbery  <eagle@windlord.stanford.edu>
+
+        * README: Tie::ShadowHash 0.4 released.
+
+        * test.pl: Switched from using SDBM_File to using AnyDBM_File
+        since for some reason SDBM isn't built on the Mac port.  Also
+        switched to building the DBM on the fly before running any tests,
+        since a lot of DBMs (including SDBM) are byte-order-dependent.
+
+        * test/first.txt: New file.
+        test/first.dir: Removed.
+        test/first.pag: Removed.
+
 Mon Mar 22 05:22:49 1999  Russ Allbery  <eagle@windlord.stanford.edu>
 
         * README: Tie::ShadowHash 0.3 released.
