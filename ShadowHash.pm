@@ -324,7 +324,7 @@ tried to open that file, the open failed with that system error message.
 =item Invalid source type %s
 
 Tie::Shadowhash was given a tagged data source of an unknown type.  The
-only currently supported tagged data source is "text".
+only currently supported tagged data source is C<text>.
 
 =back
 
