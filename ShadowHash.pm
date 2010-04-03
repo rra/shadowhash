@@ -117,7 +117,7 @@ sub TIEHASH {
 sub FETCH {
     my ($self, $key) = @_;
     return if $self->{DELETED}{$key};
-    for my $source ($$self{OVERRIDE}, @{$$self{SOURCES}}) {
+    for my $source ($self->{OVERRIDE}, @{ $self->{SOURCES} }) {
         return $source->{$key} if defined $source->{$key};
     }
     return;
