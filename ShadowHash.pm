@@ -67,8 +67,8 @@ sub text_source {
 # are arguments), filenames (in which case it's taken to be a text file with
 # each line being a key), or hash references (possibly to tied hashes).
 sub add {
-    my $self = shift;
-    for my $source (@_) {
+    my ($self, @sources) = @_;
+    for my $source (@sources) {
         if (ref $source eq 'ARRAY') {
             my ($type, @args) = @$source;
             if ($type eq 'text') {
@@ -270,13 +270,13 @@ value.
 
 Tie::Shadowhash also supports special tagged data sources that can take
 options specifying their behavior.  The only tagged data source currently
-supported is "text", which takes a filename of a text file and a reference
-to a sub.  The sub is called for every line of the file, with that line as
-an argument, and is expected to return a list.  The first element of the
-list will be the key, and the second and subsequent elements will be the
-value or values.  If there is more than one value, the value stored in the
-hash and associated with that key is an anonymous array containing all of
-them.
+supported is C<text>, which takes a filename of a text file and a
+reference to a sub.  The sub is called for every line of the file, with
+that line as an argument, and is expected to return a list.  The first
+element of the list will be the key, and the second and subsequent
+elements will be the value or values.  If there is more than one value,
+the value stored in the hash and associated with that key is an anonymous
+array containing all of them.
 
 Tagged data sources are distinguished from normal data sources by passing
 them to tie() (or to add() -- see below) as an anonymous array.  The first
@@ -299,9 +299,17 @@ source from a shadow hash after it's been added (you can, of course,
 always untie the shadow hash and dispose of the underlying object if you
 saved it to destroy the shadow hash completely).
 
-You can call the add() method of the underlying object to add data sources
-to the shadow hash.  It takes the same arguments as the initial tie() does
-and interprets them in the same way.
+=head1 INSTANCE METHODS
+
+=over 4
+
+=item add(SOURCE [, SOURCE ...])
+
+Adds the given sources to an existing shadow hash.  This method can be
+called on the object returned by the initial tie() call.  It takes the
+same arguments as the initial tie() and interprets them the same way.
+
+=back
 
 =head1 DIAGNOSTICS
 
@@ -330,11 +338,12 @@ put something in a shadow hash, you'll need to clean out the shadow hash
 as well as everything else that references a variable if you want to free
 it completely.
 
-Not all tied hashes implement EXISTS; in particular, ODBM, NDBM, some old
-versions of GDBM, and versions of SDBM in Perl 5.005_56 or earlier don't.
-Calling exists on a shadow hash that includes one of those tied hashes as
-a data source may therefore result in a runtime error.  Tie::ShadowHash
-doesn't use exists except to implement the EXISTS method because of this.
+Not all tied hashes implement EXISTS; in particular, ODBM_File, NDBM_File,
+and some old versions of GDBM_File don't, and therefore AnyDBM_File
+doesn't either.  Calling exists on a shadow hash that includes one of
+those tied hashes as a data source may therefore result in an exception.
+Tie::ShadowHash doesn't use exists except to implement the EXISTS method
+because of this.
 
 Because it can't use EXISTS due to the above problem, Tie::ShadowHash
 cannot correctly distinguish between a non-existent key and an existing

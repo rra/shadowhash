@@ -1,9 +1,14 @@
 2010-04-03  Russ Allbery  <rra@stanford.edu>
 
+	* ShadowHash.pm: Add explicit documentation for the add() method.
+	Mention that AnyDBM_File doesn't support EXISTS since some of its
+	underlying modules don't.
+
 	* ShadowHash.pm (NEXTKEY): When traversing the hash, adjust for
 	keys that are shadowed by earlier hashes or by the override hash.
 	Previously, keys that occurred in multiple sources or in the
 	override hash would be returned multiple times by each.
+
 	* t/basic.t: Test correct override handling on each.
 
 	* test.pl: Moved to...
