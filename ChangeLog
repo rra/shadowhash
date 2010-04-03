@@ -2,6 +2,10 @@
 
 	* ShadowHash.pm: Tie::ShadowHash 1.0 released.
 
+	* Makefile.PL: Change the dist name to Tie-ShadowHash.  Use angle
+	brackets for my e-mail address.  Set the LICENSE parameter for
+	Perl 5.10 or later.
+
 	* t/pod.t: Test syntactic validity of POD documentation.
 	* t/pod-spelling.t: Test spelling in POD documentation, but only
 	for maintainers.
