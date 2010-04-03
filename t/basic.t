@@ -9,7 +9,7 @@ use strict;
 
 use AnyDBM_File;
 use Fcntl qw(O_CREAT O_RDONLY O_RDWR);
-use Test::More tests => 45;
+use Test::More tests => 48;
 
 require_ok ('Tie::ShadowHash');
 
@@ -159,6 +159,14 @@ ok (scalar %hash, '...and now the scalar value is true');
 delete $hash{foo};
 delete $hash{bar};
 ok (!scalar %hash, 'The scalar value is false after deleting both members');
+
+# Ensure that storing an undefined value directly in the shadow hash works
+# properly with FETCH.
+%hash = ();
+is ($obj->add (\%extra), 1, 'Adding the hash again works');
+is ($hash{foo}, 1, '...and the value of foo is what we expect');
+$hash{foo} = undef;
+is ($hash{foo}, undef, 'The value is undef after explicitly storing that');
 
 # Clean up after ourselves (delete first* in $data except for first.txt).
 opendir (DATA, $data) or BAIL_OUT ("Cannot open $data to clean up: $!");

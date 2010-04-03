@@ -117,7 +117,8 @@ sub TIEHASH {
 sub FETCH {
     my ($self, $key) = @_;
     return if $self->{DELETED}{$key};
-    for my $source ($self->{OVERRIDE}, @{ $self->{SOURCES} }) {
+    return $self->{OVERRIDE}{$key} if exists $self->{OVERRIDE}{$key};
+    for my $source (@{ $self->{SOURCES} }) {
         return $source->{$key} if defined $source->{$key};
     }
     return;
@@ -144,7 +145,7 @@ sub CLEAR {
 }
 
 # This could throw an exception if any underlying source doesn't support
-# exists (like NDBM_File or SDBM_File without my patch).
+# exists (like NDBM_File).
 sub EXISTS {
     my ($self, $key) = @_;
     return if exists $self->{DELETED}{$key};

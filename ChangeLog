@@ -1,5 +1,9 @@
 2010-04-03  Russ Allbery  <rra@stanford.edu>
 
+	* ShadowHash.pm (FETCH): Correctly return undef if undef was
+	explicitly stored in the hash.
+	* t/basic.t: Test handling of explicit stores of undef values.
+
 	* t/basic.t: Add some tests for the scalar value of the hash.
 
 	* ShadowHash.pm: Add explicit documentation for the add() method.
