@@ -1,5 +1,9 @@
 2010-04-03  Russ Allbery  <rra@stanford.edu>
 
+	* test.pl: Moved to...
+	* t/basic.t: ...here and rewritten to use Test::More.  Moved all
+	test data from test to t/data.
+
 	* ShadowHash.pm: Require Perl 5.006 or later.  Use the three
 	argument form of open and declare iterator variables in for
 	statements.  Clean up coding style for explicit return and

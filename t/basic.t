@@ -1,0 +1,134 @@
+#!/usr/bin/perl -w
+#
+# Copyright 1999, 2002, 2010 Russ Allbery <rra@stanford.edu>
+#
+# This program is free software; you may redistribute it and/or modify it
+# under the same terms as Perl itself.
+
+use strict;
+
+use AnyDBM_File;
+use Fcntl qw(O_CREAT O_RDONLY O_RDWR);
+use Test::More tests => 34;
+
+require_ok ('Tie::ShadowHash');
+
+# Test setup.  Locate the test data directory and then tie an AnyDBM_File
+# object and create a tied hash with something interesting in it.
+my $data;
+for my $dir (qw(./data ./t/data ../t/data)) {
+    $data = $dir if -d $dir;
+}
+BAIL_OUT ('Cannot find test data directory') unless $data;
+my (%hash, $db);
+$db = tie (%hash, 'AnyDBM_File', "$data/first", O_RDWR | O_CREAT, 0666);
+BAIL_OUT ('Cannot create AnyDBM_File tied hash') unless $db;
+open (DATA, '<', "$data/first.txt")
+    or BAIL_OUT ("Can't open $data/first.txt: $!");
+while (<DATA>) {
+    chomp;
+    $hash{$_} = 1;
+}
+close DATA;
+undef $db;
+untie %hash;
+
+# Some basic checks against a text file.
+my $obj = tie (%hash, 'Tie::ShadowHash', "$data/second.txt");
+isa_ok ($obj, 'Tie::ShadowHash');
+is ($hash{admin}, 1, 'Found existing key in text source');
+ok (!exists ($hash{meta}), 'Non-existing key returned false to exists');
+$hash{meta} = 2;
+$hash{admin} = 2;
+is ($hash{meta}, 2, 'Overriding non-existing key');
+is ($hash{admin}, 2, 'Overriding existing key');
+is ($hash{jp}, 1, 'Another untouched key is still correct');
+delete $hash{jp};
+ok (!exists ($hash{jp}), '...and it does not exist after we delete it');
+$hash{jp} = 2;
+is ($hash{jp}, 2, '...and we can set it to another value');
+
+# Tie only the dbm file and check some basic functionality.
+undef $obj;
+untie %hash;
+my %db;
+unless (tie (%db, 'AnyDBM_File', "$data/first", O_RDONLY, 0666)) {
+    BAIL_OUT ("Cannot tie newly created db file");
+}
+$obj = tie (%hash, 'Tie::ShadowHash', \%db);
+isa_ok ($obj, 'Tie::ShadowHash');
+is ($hash{meta}, 1, 'Found existing key in dbm source');
+is ($hash{admin}, undef, 'Non-existing key returns undef');
+$hash{admin} = 2;
+is ($hash{admin}, 2, 'Overriding existing key');
+is ($db{admin}, undef, '...and underlying source is unchanged');
+delete $hash{meta};
+is ($hash{meta}, undef, 'Deleting existing key');
+is ($db{meta}, 1, '...and underlying source is unchanged');
+
+# Check clearning the hash.
+%hash = ();
+is ($hash{sg}, undef, 'Existing key is undefined after clearing');
+
+# Add back in both the dbm file and the text file.
+is ($obj->add (\%db, "$data/second.txt"), 1, 'Adding sources');
+is ($hash{admin}, 1, 'Found data in text file');
+is ($hash{meta}, 1, 'Found data in dbm file');
+is ($hash{fooba}, undef, 'Keys missing in both fall through');
+
+# Compare a keys listing with the full data.
+open (FULL, '<', "$data/full") or BAIL_OUT ("Cannot open $data/full: $!");
+my @full = sort <FULL>;
+close FULL;
+chomp @full;
+my @keys = sort keys %hash;
+is_deeply (\@keys, \@full, 'Complete key listing matches');
+
+# Make sure deleted keys are skipped in a key listing.
+delete $hash{sg};
+@keys = keys %hash;
+is (scalar (@keys), scalar (@full) - 1, 'One fewer key after deletion');
+ok (!(grep { $_ eq 'sg' } @keys), '...and the deleted key is missing');
+
+# Try adding a special text source with a sub to split key and value.
+%hash = ();
+is ($obj->add ([text => "$data/pairs.txt", sub { split (' ', $_[0], 2) }]),
+    1, 'Adding special text source works');
+open (FULL, '<', "$data/pairs.txt")
+    or BAIL_OUT ("Cannot open $data/pairs.txt: $!");
+my %full;
+while (<FULL>) {
+    chomp;
+    my ($key, $value) = split (' ', $_, 2);
+    $full{$key} = $value;
+}
+close FULL;
+is (scalar keys (%full), scalar keys (%hash), '...and has correct key count');
+for my $key (sort keys %full) {
+    is ($hash{$key}, $full{$key}, "...and value of $key is correct");
+}
+
+# Add a special text source that returns an array of values.
+%hash = ();
+is ($obj->add ([text => "$data/triples.txt", sub { split (' ', $_[0]) }]), 1,
+    'Adding second special text source works');
+open (FULL, '<', "$data/triples.txt")
+    or BAIL_OUT ("Cannot open $data/triples.txt: $!");
+undef %full;
+while (<FULL>) {
+    chomp;
+    my ($key, @value) = split (' ', $_);
+    $full{$key} = [ @value ];
+}
+close FULL;
+is (scalar keys (%full), scalar keys (%hash), '...and has correct key count');
+for my $key (sort keys %full) {
+    is_deeply ($hash{$key}, $full{$key}, "...and value of $key is correct");
+}
+
+# Clean up after ourselves (delete first* in $data except for first.txt).
+opendir (DATA, $data) or BAIL_OUT ("Cannot open $data to clean up: $!");
+for my $file (grep { /^first/ } readdir DATA) {
+    unlink "$data/$file" unless $file eq 'first.txt';
+}
+closedir DATA;
