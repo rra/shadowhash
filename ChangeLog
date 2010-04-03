@@ -1,5 +1,10 @@
 2010-04-03  Russ Allbery  <rra@stanford.edu>
 
+	* t/pod.t: Test syntactic validity of POD documentation.
+	* t/pod-spelling.t: Test spelling in POD documentation, but only
+	for maintainers.
+	* ShadowHash.pm: Add stopwords for spelling checks.
+
 	* ShadowHash.pm (FETCH): Correctly return undef if undef was
 	explicitly stored in the hash.
 	* t/basic.t: Test handling of explicit stores of undef values.

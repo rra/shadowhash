@@ -222,6 +222,9 @@ __DATA__
 
 Tie::ShadowHash - Merge multiple data sources into a hash
 
+=for stopwords
+DBM Allbery
+
 =head1 SYNOPSIS
 
     use Tie::ShadowHash;
@@ -271,7 +274,7 @@ value.
 
 Tie::Shadowhash also supports special tagged data sources that can take
 options specifying their behavior.  The only tagged data source currently
-supported is C<text>, which takes a filename of a text file and a
+supported is C<text>, which takes a file name of a text file and a
 reference to a sub.  The sub is called for every line of the file, with
 that line as an argument, and is expected to return a list.  The first
 element of the list will be the key, and the second and subsequent
