@@ -9,7 +9,7 @@ use strict;
 
 use AnyDBM_File;
 use Fcntl qw(O_CREAT O_RDONLY O_RDWR);
-use Test::More tests => 34;
+use Test::More tests => 41;
 
 require_ok ('Tie::ShadowHash');
 
@@ -89,6 +89,30 @@ delete $hash{sg};
 @keys = keys %hash;
 is (scalar (@keys), scalar (@full) - 1, 'One fewer key after deletion');
 ok (!(grep { $_ eq 'sg' } @keys), '...and the deleted key is missing');
+
+# Add an additional hash with a key that duplicates a key from an earlier hash
+# and ensure that we don't see it twice in the keys listing.
+my %extra = (admin => 'foo');
+is ($obj->add (\%extra), 1, 'Adding another hash source succeeds');
+@keys = keys %hash;
+is (scalar (@keys), scalar (@full) - 1, 'Duplicate keys do not add to count');
+is ($hash{admin}, 1, '...and the earlier source still prevails');
+
+# Restoring the deleted key should increment our key count again.
+$hash{sg} = 'override';
+@keys = keys %hash;
+is (scalar (@keys), scalar (@full),
+    'Setting a deleted key restores the count');
+
+# Now add an override and ensure that doesn't cause duplicate keys either, but
+# adding a new key via an override should increase our key count.
+$hash{admin} = 'foo';
+@keys = keys %hash;
+is (scalar (@keys), scalar (@full), 'Overriden keys do not add to count');
+is ($hash{admin}, 'foo', '...and the override is effective');
+$hash{override} = 1;
+@keys = keys %hash;
+is (scalar (@keys), scalar (@full) + 1, 'Added keys do add to count');
 
 # Try adding a special text source with a sub to split key and value.
 %hash = ();

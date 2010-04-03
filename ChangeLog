@@ -1,5 +1,11 @@
 2010-04-03  Russ Allbery  <rra@stanford.edu>
 
+	* ShadowHash.pm (NEXTKEY): When traversing the hash, adjust for
+	keys that are shadowed by earlier hashes or by the override hash.
+	Previously, keys that occurred in multiple sources or in the
+	override hash would be returned multiple times by each.
+	* t/basic.t: Test correct override handling on each.
+
 	* test.pl: Moved to...
 	* t/basic.t: ...here and rewritten to use Test::More.  Moved all
 	test data from test to t/data.

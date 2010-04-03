@@ -172,11 +172,13 @@ sub FIRSTKEY {
     return $self->NEXTKEY;
 }
 
-# Walk the sources by calling each on each one in turn, skipping deleted keys
-# and using $self->{EACH} to store the number of source we're at.
+# Walk the sources by calling each on each one in turn, skipping deleted
+# keys and keys shadowed by earlier hashes and using $self->{EACH} to
+# store the number of source we're at.
 sub NEXTKEY {
     my ($self) = @_;
     my @result = ();
+  SOURCE:
     while (!@result && $self->{EACH} < @{ $self->{SOURCES} }) {
         if ($self->{EACH} == -1) {
             @result = each %{ $self->{OVERRIDE} };
@@ -186,6 +188,19 @@ sub NEXTKEY {
         if (@result && $self->{DELETED}{$result[0]}) {
             undef @result;
             next;
+        }
+        if (@result && $self->{EACH} > -1) {
+            my $key = $result[0];
+            if (exists $self->{OVERRIDE}{$key}) {
+                undef @result;
+                next;
+            }
+            for (my $index = $self->{EACH} - 1; $index >= 0; $index--) {
+                if (defined $self->{SOURCES}[$index]{$key}) {
+                    undef @result;
+                    next SOURCE;
+                }
+            }
         }
         return (wantarray ? @result : $result[0]) if @result;
         $self->{EACH}++;
