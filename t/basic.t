@@ -9,7 +9,7 @@ use strict;
 
 use AnyDBM_File;
 use Fcntl qw(O_CREAT O_RDONLY O_RDWR);
-use Test::More tests => 41;
+use Test::More tests => 45;
 
 require_ok ('Tie::ShadowHash');
 
@@ -149,6 +149,16 @@ is (scalar keys (%full), scalar keys (%hash), '...and has correct key count');
 for my $key (sort keys %full) {
     is_deeply ($hash{$key}, $full{$key}, "...and value of $key is correct");
 }
+
+# Test handling of the hash in a scalar context.
+%hash = ();
+ok (!scalar %hash, 'Scalar value is false when the hash as been cleared');
+%extra = (foo => 1, bar => 1);
+is ($obj->add (\%extra), 1, 'Adding a hash works');
+ok (scalar %hash, '...and now the scalar value is true');
+delete $hash{foo};
+delete $hash{bar};
+ok (!scalar %hash, 'The scalar value is false after deleting both members');
 
 # Clean up after ourselves (delete first* in $data except for first.txt).
 opendir (DATA, $data) or BAIL_OUT ("Cannot open $data to clean up: $!");
