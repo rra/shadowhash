@@ -1,0 +1,5 @@
+/Makefile
+/Makefile.old
+/ShadowHash-*.tar.gz
+/blib/
+/pm_to_blib
