@@ -22,7 +22,7 @@ require 5.006;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.07';
+$VERSION = '1.00';
 
 ##############################################################################
 # Regular methods

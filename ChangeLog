@@ -1,5 +1,7 @@
 2010-04-03  Russ Allbery  <rra@stanford.edu>
 
+	* ShadowHash.pm: Tie::ShadowHash 1.0 released.
+
 	* t/pod.t: Test syntactic validity of POD documentation.
 	* t/pod-spelling.t: Test spelling in POD documentation, but only
 	for maintainers.
