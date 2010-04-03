@@ -1,3 +1,10 @@
+2010-04-03  Russ Allbery  <rra@stanford.edu>
+
+	* ShadowHash.pm: Require Perl 5.006 or later.  Use the three
+	argument form of open and declare iterator variables in for
+	statements.  Clean up coding style for explicit return and
+	dereferencing.
+
 2002-07-27  Russ Allbery  <rra@stanford.edu>
 
 	* README: Tie::ShadowHash 0.7 released.

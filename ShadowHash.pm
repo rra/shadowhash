@@ -1,7 +1,6 @@
-# Tie::ShadowHash -- Merge multiple data sources into a hash.  -*- perl -*-
-# $Id$
+# Tie::ShadowHash -- Merge multiple data sources into a hash.
 #
-# Copyright 1999, 2002 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2002, 2010 by Russ Allbery <rra@stanford.edu>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -18,14 +17,12 @@
 ##############################################################################
 
 package Tie::ShadowHash;
-require 5.003;
+require 5.006;
 
 use strict;
 use vars qw($VERSION);
 
-# Don't use the CVS revision as the version, since too many things could munge
-# CVS magic revision strings, but this version should match the CVS revision.
-$VERSION = 0.07;
+$VERSION = '0.07';
 
 ##############################################################################
 # Regular methods
@@ -34,7 +31,7 @@ $VERSION = 0.07;
 # This should pretty much never be called; tie calls TIEHASH.
 sub new {
     my $class = shift;
-    $class->TIEHASH (@_)
+    return $class->TIEHASH (@_);
 }
 
 # Given a file name and optionally a split regex, builds a hash out of the
@@ -46,7 +43,7 @@ sub new {
 # occurs in the file.
 sub text_source {
     my ($self, $file, $split) = @_;
-    unless (open (HASH, "< $file\0")) {
+    unless (open (HASH, '<', $file)) {
         require Carp;
         Carp::croak ("Can't open file $file: $!");
     }
@@ -71,8 +68,7 @@ sub text_source {
 # each line being a key), or hash references (possibly to tied hashes).
 sub add {
     my $self = shift;
-    for (@_) {
-        my $source = $_;
+    for my $source (@_) {
         if (ref $source eq 'ARRAY') {
             my ($type, @args) = @$source;
             if ($type eq 'text') {
@@ -84,9 +80,9 @@ sub add {
         } elsif (!ref $source) {
             $source = $self->text_source ($source);
         }
-        push (@{$$self{SOURCES}}, $source);
+        push (@{ $$self{SOURCES} }, $source);
     }
-    1;
+    return 1;
 }
 
 ##############################################################################
@@ -111,7 +107,7 @@ sub TIEHASH {
     };
     bless ($self, $class);
     $self->add (@_) if @_;
-    $self;
+    return $self;
 }
 
 # Note that this doesn't work quite right in the case of keys with undefined
@@ -120,75 +116,81 @@ sub TIEHASH {
 # don't implement exists.
 sub FETCH {
     my ($self, $key) = @_;
-    return if $$self{DELETED}{$key};
-    for ($$self{OVERRIDE}, @{$$self{SOURCES}}) {
-        return $$_{$key} if defined $$_{$key};
+    return if $self->{DELETED}{$key};
+    for my $source ($$self{OVERRIDE}, @{$$self{SOURCES}}) {
+        return $source->{$key} if defined $source->{$key};
     }
-    undef;
+    return;
 }
 
 sub STORE {
-    delete $_[0]{DELETED}{$_[1]};
-    $_[0]{OVERRIDE}{$_[1]} = $_[2];
+    my ($self, $key, $value) = @_;
+    delete $self->{DELETED}{$key};
+    $self->{OVERRIDE}{$key} = $value;
 }
 
 sub DELETE {
-    delete $_[0]{OVERRIDE}{$_[1]};
-    $_[0]{DELETED}{$_[1]} = 1;
+    my ($self, $key) = @_;
+    delete $self->{OVERRIDE}{$key};
+    $self->{DELETED}{$key} = 1;
 }
 
 sub CLEAR {
-    my $self = shift;
-    $$self{DELETED} = {};
-    $$self{OVERRIDE} = {};
-    $$self{SOURCES} = [];
-    $$self{EACH} = -1;
+    my ($self) = @_;
+    $self->{DELETED} = {};
+    $self->{OVERRIDE} = {};
+    $self->{SOURCES} = [];
+    $self->{EACH} = -1;
 }
 
 # This could throw an exception if any underlying source doesn't support
 # exists (like NDBM_File or SDBM_File without my patch).
 sub EXISTS {
     my ($self, $key) = @_;
-    return if exists $$self{DELETED}{$key};
-    for ($$self{OVERRIDE}, @{$$self{SOURCES}}) {
-        return 1 if exists $$_{$key};
+    return if exists $self->{DELETED}{$key};
+    for my $source ($self->{OVERRIDE}, @{ $self->{SOURCES} }) {
+        return 1 if exists $source->{$key};
     }
-    undef;
+    return;
 }
 
 # We have to reset the each counter on all hashes.  For tied hashes, we call
 # FIRSTKEY directly because it's potentially more efficient than calling keys
 # on the hash.
 sub FIRSTKEY {
-    my $self = shift;
-    scalar keys %{$$self{OVERRIDE}};
-    for (@{$$self{SOURCES}}) {
-        my $tie = tied $_;
-        if ($tie) { $tie->FIRSTKEY } else { scalar keys %$_ }
+    my ($self) = @_;
+    keys %{ $self->{OVERRIDE} };
+    for my $source (@{ $self->{SOURCES} }) {
+        my $tie = tied $source;
+        if ($tie) {
+            $tie->FIRSTKEY;
+        } else {
+            keys %$source;
+        }
     }
-    $$self{EACH} = -1;
-    $self->NEXTKEY;
+    $self->{EACH} = -1;
+    return $self->NEXTKEY;
 }
 
 # Walk the sources by calling each on each one in turn, skipping deleted keys
-# and using $$self{EACH} to store the number of source we're at.
+# and using $self->{EACH} to store the number of source we're at.
 sub NEXTKEY {
-    my $self = shift;
+    my ($self) = @_;
     my @result = ();
-    while (!@result && $$self{EACH} < @{$$self{SOURCES}}) {
-        if ($$self{EACH} == -1) {
-            @result = each %{$$self{OVERRIDE}};
+    while (!@result && $self->{EACH} < @{ $self->{SOURCES} }) {
+        if ($self->{EACH} == -1) {
+            @result = each %{ $self->{OVERRIDE} };
         } else {
-            @result = each %{$$self{SOURCES}[$$self{EACH}]};
+            @result = each %{ $self->{SOURCES}[$self->{EACH}] };
         }
-        if (@result && $$self{DELETED}{$result[0]}) {
+        if (@result && $self->{DELETED}{$result[0]}) {
             undef @result;
             next;
         }
         return (wantarray ? @result : $result[0]) if @result;
-        $$self{EACH}++;
+        $self->{EACH}++;
     }
-    undef;
+    return;
 }
 
 ##############################################################################
@@ -237,18 +239,19 @@ Tie::ShadowHash - Merge multiple data sources into a hash
 
 =head1 DESCRIPTION
 
-This module merges together multiple sets of data in the form of hashes into
-a data structure that looks to Perl like a single simple hash.  When that
-hash is accessed, the data structures managed by that shadow hash are
+This module merges together multiple sets of data in the form of hashes
+into a data structure that looks to Perl like a single simple hash.  When
+that hash is accessed, the data structures managed by that shadow hash are
 searched in order they were added for that key.  This allows the rest of a
 program simple and convenient access to a disparate set of data sources.
 
 Tie::ShadowHash can handle anything that looks like a hash; just give it a
-reference as one of the additional arguments to tie().  This includes other
-tied hashes, so you can include DB and DBM files as data sources for a
-shadow hash.  If given a plain file name instead of a reference, it will
-build a hash to use internally, with each chomped line of the file being the
-key and the number of times that line is seen in the file being the value.
+reference as one of the additional arguments to tie().  This includes
+other tied hashes, so you can include DB and DBM files as data sources for
+a shadow hash.  If given a plain file name instead of a reference, it will
+build a hash to use internally, with each chomped line of the file being
+the key and the number of times that line is seen in the file being the
+value.
 
 Tie::Shadowhash also supports special tagged data sources that can take
 options specifying their behavior.  The only tagged data source currently
@@ -268,18 +271,18 @@ for examples.
 
 The shadow hash can be modified, and the modifications override the data
 sources, but modifications aren't propagated back to the data sources.  In
-other words, the shadow hash treats all data sources as read-only and saves
-your modifications only in internal memory.  This lets you make changes to
-the shadow hash for the rest of your program without affecting the
-underlying data in any way (and this behavior is the main reason why this is
-called a shadow hash).
+other words, the shadow hash treats all data sources as read-only and
+saves your modifications only in internal memory.  This lets you make
+changes to the shadow hash for the rest of your program without affecting
+the underlying data in any way (and this behavior is the main reason why
+this is called a shadow hash).
 
 If the shadow hash is cleared, by assigning the empty list to it, by
 explicitly calling CLEAR(), or by some other method, all data sources are
 dropped from the shadow hash.  There is no other way of removing a data
-source from a shadow hash after it's been added (you can, of course, always
-untie the shadow hash and dispose of the underlying object if you saved it
-to destroy the shadow hash completely).
+source from a shadow hash after it's been added (you can, of course,
+always untie the shadow hash and dispose of the underlying object if you
+saved it to destroy the shadow hash completely).
 
 You can call the add() method of the underlying object to add data sources
 to the shadow hash.  It takes the same arguments as the initial tie() does
@@ -291,8 +294,8 @@ and interprets them in the same way.
 
 =item Can't open file %s: %s
 
-Tie::ShadowHash was given a file name to use as a source, but when it tried
-to open that file, the open failed with that system error message.
+Tie::ShadowHash was given a file name to use as a source, but when it
+tried to open that file, the open failed with that system error message.
 
 =item Invalid source type %s
 
@@ -304,48 +307,48 @@ only currently supported tagged data source is "text".
 =head1 CAVEATS
 
 It's worth paying very careful attention to L<perltie/"The untie Gotcha">
-when using this module.  It's also important to be careful about what you do
-with tied hashes that are included in a shadow hash.  Tie::ShadowHash stores
-a reference to such arrays; if you untie them out from under a shadow hash,
-you may not get the results you expect.  Remember that if you put something
-in a shadow hash, you'll need to clean out the shadow hash as well as
-everything else that references a variable if you want to free it
-completely.
+when using this module.  It's also important to be careful about what you
+do with tied hashes that are included in a shadow hash.  Tie::ShadowHash
+stores a reference to such arrays; if you untie them out from under a
+shadow hash, you may not get the results you expect.  Remember that if you
+put something in a shadow hash, you'll need to clean out the shadow hash
+as well as everything else that references a variable if you want to free
+it completely.
 
 Not all tied hashes implement EXISTS; in particular, ODBM, NDBM, some old
 versions of GDBM, and versions of SDBM in Perl 5.005_56 or earlier don't.
-Calling exists on a shadow hash that includes one of those tied hashes as a
-data source may therefore result in a runtime error.  Tie::ShadowHash
+Calling exists on a shadow hash that includes one of those tied hashes as
+a data source may therefore result in a runtime error.  Tie::ShadowHash
 doesn't use exists except to implement the EXISTS method because of this.
 
-Because it can't use EXISTS due to the above problem, Tie::ShadowHash cannot
-correctly distinguish between a non-existent key and an existing key
-associated with an undefined value.  This isn't a large problem, since many
-tied hashes can't store undefined values anyway, but it means that if one of
-your data sources contains a given key associated with an undefined value
-and one of your later data sources contains the same key but with a defined
-value, when the shadow hash is accessed using that key, it will return the
-first defined value it finds.  This is an exception to the normal rule that
-all data sources are searched in order and the value returned by an access
-is the first value found.  (Tie::ShadowHash does correctly handle undefined
-values stored directly in the shadow hash.)
+Because it can't use EXISTS due to the above problem, Tie::ShadowHash
+cannot correctly distinguish between a non-existent key and an existing
+key associated with an undefined value.  This isn't a large problem, since
+many tied hashes can't store undefined values anyway, but it means that if
+one of your data sources contains a given key associated with an undefined
+value and one of your later data sources contains the same key but with a
+defined value, when the shadow hash is accessed using that key, it will
+return the first defined value it finds.  This is an exception to the
+normal rule that all data sources are searched in order and the value
+returned by an access is the first value found.  (Tie::ShadowHash does
+correctly handle undefined values stored directly in the shadow hash.)
+
+=head1 AUTHOR
+
+Russ Allbery <rra@stanford.edu>
+
+=head1 COPYRIGHT AND LICENSE
+
+Copyright 1999, 2002, 2010 by Russ Allbery <rra@stanford.edu>
+
+This program is free software; you may redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
 L<perltie>
 
-The current version of this module is available from its web site at
-L<http://www.eyrie.org/~eagle/software/shadowhash/>.
-
-=head1 AUTHOR
-
-Russ Allbery <rra@stanford.edu>.
-
-=head1 COPYRIGHT AND LICENSE
-
-Copyright 1999, 2002 by Russ Allbery <rra@stanford.edu>
-
-This program is free software; you may redistribute it and/or modify it
-under the same terms as Perl itself.
+The current version of this module is always available from its web site
+at L<http://www.eyrie.org/~eagle/software/shadowhash/>.
 
 =cut
