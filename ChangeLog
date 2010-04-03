@@ -1,5 +1,7 @@
 2002-07-27  Russ Allbery  <rra@stanford.edu>
 
+	* README: Tie::ShadowHash 0.7 released.
+
 	* ShadowHash.pm: Add SEE ALSO and COPYRIGHT AND LICENSE sections
 	to the documentation.  Reformat for current formatting style.
 
