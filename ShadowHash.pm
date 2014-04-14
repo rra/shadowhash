@@ -1,6 +1,6 @@
 # Tie::ShadowHash -- Merge multiple data sources into a hash.
 #
-# Copyright 1999, 2002, 2010 by Russ Allbery <rra@stanford.edu>
+# Copyright 1999, 2002, 2010 by Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -363,11 +363,11 @@ correctly handle undefined values stored directly in the shadow hash.)
 
 =head1 AUTHOR
 
-Russ Allbery <rra@stanford.edu>
+Russ Allbery <rra@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2002, 2010 by Russ Allbery <rra@stanford.edu>
+Copyright 1999, 2002, 2010 by Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.

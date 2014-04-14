@@ -1,4 +1,4 @@
-2010-04-03  Russ Allbery  <rra@stanford.edu>
+2010-04-03  Russ Allbery  <rra@cpan.org>
 
 	* ShadowHash.pm: Tie::ShadowHash 1.0 released.
 
@@ -37,14 +37,14 @@
 	statements.  Clean up coding style for explicit return and
 	dereferencing.
 
-2002-07-27  Russ Allbery  <rra@stanford.edu>
+2002-07-27  Russ Allbery  <rra@cpan.org>
 
 	* README: Tie::ShadowHash 0.7 released.
 
 	* ShadowHash.pm: Add SEE ALSO and COPYRIGHT AND LICENSE sections
 	to the documentation.  Reformat for current formatting style.
 
-1999-06-02  Russ Allbery  <rra@stanford.edu>
+1999-06-02  Russ Allbery  <rra@cpan.org>
 
 	* README: Tie::ShadowHash 0.6 released.
 
@@ -59,7 +59,7 @@
 	* test/pairs.txt: New file.
 	* test/triples.txt: New file.
 
-1999-04-03  Russ Allbery  <rra@stanford.edu>
+1999-04-03  Russ Allbery  <rra@cpan.org>
 
 	* README: Tie::ShadowHash 0.5 released.
 
@@ -82,7 +82,7 @@
 	* test/first.dir: Removed.
 	* test/first.pag: Removed.
 
-1999-03-22  Russ Allbery  <rra@stanford.edu>
+1999-03-22  Russ Allbery  <rra@cpan.org>
 
 	* README: Tie::ShadowHash 0.3 released.
 
@@ -106,6 +106,6 @@
 	identical keys with defined values.  *sigh*  Also, make add()
 	return true.
 
-1999-03-21  Russ Allbery  <rra@stanford.edu>
+1999-03-21  Russ Allbery  <rra@cpan.org>
 
 	* ShadowHash.pm: [Revision 0.1] New file.

@@ -7,7 +7,7 @@ WriteMakefile (
     DISTNAME     => 'Tie-ShadowHash',
     ($] >= 5.005 ?
      (ABSTRACT   => 'Merge multiple data sources into a hash',
-      AUTHOR     => 'Russ Allbery <rra@stanford.edu>') : ()),
+      AUTHOR     => 'Russ Allbery <rra@cpan.org>') : ()),
     ($] >= 5.010 ?
      (LICENSE    => 'perl') : ()),
     VERSION_FROM => 'ShadowHash.pm',
