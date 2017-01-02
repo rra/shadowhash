@@ -7,6 +7,9 @@ of this as fast as I'd like.  If you'd like to implement anything on this
 list, drop me a line first at rra@cpan.org and then have at it!
 Credits will be noted in the README.
 
+ * Update package coding style, build system, and documentation to follow
+   my current Perl module standards.
+
  * A way of removing a specific source from the shadow hash might be nice,
    but we'd have to solve the naming problem.
 
