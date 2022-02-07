@@ -1,6 +1,6 @@
 # Tie::ShadowHash -- Merge multiple data sources into a hash.
 #
-# Copyright 1999, 2002, 2010 by Russ Allbery <rra@cpan.org>
+# Copyright 1999, 2002, 2010, 2022 by Russ Allbery <rra@cpan.org>
 #
 # This program is free software; you may redistribute it and/or modify it
 # under the same terms as Perl itself.
@@ -28,12 +28,6 @@ $VERSION = '1.00';
 # Regular methods
 ##############################################################################
 
-# This should pretty much never be called; tie calls TIEHASH.
-sub new {
-    my $class = shift;
-    return $class->TIEHASH (@_);
-}
-
 # Given a file name and optionally a split regex, builds a hash out of the
 # contents of the file.  If the split sub exists, use it to split each line
 # into an array; if the array has two elements, those are taken as the key and
@@ -41,7 +35,7 @@ sub new {
 # everything but the first.  If there's no split sub, take the entire line
 # modulo the line terminator as the key and the value the number of times it
 # occurs in the file.
-sub text_source {
+sub _text_source {
     my ($self, $file, $split) = @_;
     unless (open (HASH, '<', $file)) {
         require Carp;
@@ -72,13 +66,13 @@ sub add {
         if (ref $source eq 'ARRAY') {
             my ($type, @args) = @$source;
             if ($type eq 'text') {
-                $source = $self->text_source (@args);
+                $source = $self->_text_source (@args);
             } else {
                 require Carp;
                 Carp::croak ("Invalid source type $type");
             }
         } elsif (!ref $source) {
-            $source = $self->text_source ($source);
+            $source = $self->_text_source ($source);
         }
         push (@{ $$self{SOURCES} }, $source);
     }

@@ -1,7 +1,8 @@
                    Revision history for Tie::ShadowHash
 
-1.01 - Not Released
+2.00 - Not Released
 
+ - Remove the new() method, since tie should always be used instead.
  - Convert the build system to Module::Build.
 
 1.00 - 2010-04-03
