@@ -220,7 +220,7 @@ sub FIRSTKEY {
 # number of source we're at.
 #
 # Returns: Next key in iteration, or undef if sources are exhausted
-## no critic (Freenode::Each)
+## no critic (Community::Each)
 sub NEXTKEY {
     my ($self) = @_;
 
