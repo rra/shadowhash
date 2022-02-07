@@ -1,10 +1,12 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl
 #
 # Copyright 1999, 2002, 2010, 2022 Russ Allbery <rra@cpan.org>
 #
 # SPDX-License-Identifier: GPL-1.0-or-later OR Artistic-1.0-Perl
 
-use strict;
+use 5.024;
+use autodie;
+use warnings;
 
 use AnyDBM_File;
 use Fcntl qw(O_CREAT O_RDONLY O_RDWR);

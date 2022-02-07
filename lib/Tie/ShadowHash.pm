@@ -13,13 +13,10 @@
 # Modules and declarations
 ##############################################################################
 
-package Tie::ShadowHash;
-require 5.006;
+package Tie::ShadowHash 1.00;
 
-use strict;
-use vars qw($VERSION);
-
-$VERSION = '1.00';
+use 5.024;
+use warnings;
 
 ##############################################################################
 # Regular methods
