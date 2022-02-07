@@ -33,10 +33,11 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: perl -V
-        run: perl -V
-      - name: Install Dependencies
-        run: cpm install -g --show-build-log-on-failure
+      - uses: perl-actions/install-with-cpm@v1.4
+        with:
+          cpanfile: "cpanfile"
+          args: "--with-suggests"
+          sudo: false
       - name: Build.PL
         run: perl Build.PL
       - name: Build test
