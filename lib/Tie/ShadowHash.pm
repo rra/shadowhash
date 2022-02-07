@@ -234,7 +234,7 @@ sub NEXTKEY {
     while ($self->{EACH} < $self->{SOURCES}->@*) {
         my $key;
 
-        ## no critic (Community::Each)
+        ## no critic (Each)
         if ($self->{EACH} == -1) {
             $key = each($self->{OVERRIDE}->%*);
         } else {
