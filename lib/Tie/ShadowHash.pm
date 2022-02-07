@@ -16,59 +16,75 @@
 package Tie::ShadowHash 1.00;
 
 use 5.024;
+use autodie;
 use warnings;
+
+use Carp qw(croak);
 
 ##############################################################################
 # Regular methods
 ##############################################################################
 
 # Given a file name and optionally a split regex, builds a hash out of the
-# contents of the file.  If the split sub exists, use it to split each line
-# into an array; if the array has two elements, those are taken as the key and
-# value.  If there are more, the value is an anonymous array containing
-# everything but the first.  If there's no split sub, take the entire line
-# modulo the line terminator as the key and the value the number of times it
-# occurs in the file.
+# contents of the file.
+#
+# If the split sub exists, use it to split each line into an array; if the
+# array has two elements, those are taken as the key and value.  If there are
+# more, the value is an anonymous array containing everything but the first.
+#
+# If there's no split sub, take the entire line modulo the line terminator as
+# the key and the value the number of times it occurs in the file.
+#
+# $file  - File containing the data
+# $split - Optional anonymous sub that splits a line into key and value
+#
+# Returns: Hash created by loading the file
 sub _text_source {
     my ($self, $file, $split) = @_;
-    unless (open (HASH, '<', $file)) {
-        require Carp;
-        Carp::croak ("Can't open file $file: $!");
-    }
-    local $_;
-    my ($key, @rest, %hash);
-    while (<HASH>) {
-        chomp;
-        if (defined $split) {
-            ($key, @rest) = &$split ($_);
-            $hash{$key} = (@rest == 1) ? $rest[0] : [ @rest ];
+    my %hash;
+    open(my $fh, '<', $file);
+    while (defined(my $line = <$fh>)) {
+        chomp($line);
+        if (defined($split)) {
+            my ($key, @rest) = $split->($line);
+            $hash{$key} = (@rest == 1) ? $rest[0] : [@rest];
         } else {
-            $hash{$_}++;
+            $hash{$line}++;
         }
     }
-    close HASH;
+    close($fh);
     return \%hash;
 }
 
-# Add data sources to the shadow hash.  This takes a list of either anonymous
-# arrays (in which case the first element is the type of source and the rest
-# are arguments), filenames (in which case it's taken to be a text file with
-# each line being a key), or hash references (possibly to tied hashes).
+# Add data sources to the shadow hash.
+#
+# Each data source is one of the following:
+#
+# - An anonymous array, in which case the first element is the type of source
+#   and the rest are arguments.  Currently, "text" is the only supported type.
+#
+# - A file name, which is taken to be a text file with each line as a key and
+#   a value equal to the number of times that line appears.
+#
+# - A hash reference, possibly to a tied hash.
+#
+# @sources - Data sources to add
+#
+# Returns: True
 sub add {
     my ($self, @sources) = @_;
     for my $source (@sources) {
-        if (ref $source eq 'ARRAY') {
-            my ($type, @args) = @$source;
+        if (ref($source) eq 'ARRAY') {
+            my ($type, @args) = $source->@*;
             if ($type eq 'text') {
-                $source = $self->_text_source (@args);
+                $source = $self->_text_source(@args);
             } else {
-                require Carp;
-                Carp::croak ("Invalid source type $type");
+                croak("invalid source type $type");
             }
-        } elsif (!ref $source) {
-            $source = $self->_text_source ($source);
+        } elsif (!ref($source)) {
+            $source = $self->_text_source($source);
         }
-        push (@{ $$self{SOURCES} }, $source);
+        push($self->{SOURCES}->@*, $source);
     }
     return 1;
 }
@@ -77,125 +93,176 @@ sub add {
 # Tie methods
 ##############################################################################
 
-# DELETED is a hash holding all keys that have been deleted; it's checked
-# first on any access.  EACH is a pointer to the current structure being
-# traversed on an "each" of the shadow hash, so that they can all be traversed
-# in order.  OVERRIDE is a hash containing values set directly by the user,
-# which override anything in the shadow hash's underlying data structures.
-# And finally, SOURCES is an array of the data structures (all Perl hashes,
-# possibly tied).
+# Create a new tied hash.
+#
+# @sources - Sources to add to the new hash
+#
+# Returns: Newly created tied hash
 sub TIEHASH {
-    my $class = shift;
-    $class = ref $class || $class;
+    my ($class, @sources) = @_;
+    $class = ref($class) || $class;
+    #<<<
     my $self = {
-        DELETED  => {},
-        EACH     => -1,
-        OVERRIDE => {},
-        SOURCES  => []
+        DELETED  => {},  # All keys that have been deleted
+        EACH     => -1,  # Index of source currently being traversed
+        OVERRIDE => {},  # Values set directly by the user
+        SOURCES  => [],  # Array of all of the underlying hashes
     };
-    bless ($self, $class);
-    $self->add (@_) if @_;
+    #>>>
+    bless($self, $class);
+    $self->add(@sources);
     return $self;
 }
 
-# Note that this doesn't work quite right in the case of keys with undefined
-# values, but we can't make it work right since that would require using
-# exists and a lot of common data sources (such as NDBM_File tied hashes)
-# don't implement exists.
+# Retrieve a value.
+#
+# This doesn't work quite right in the case of keys with undefined values, but
+# we can't make it work right since that would require using exists and a lot
+# of common data sources (such as NDBM_File tied hashes) don't implement
+# exists.
+#
+# $key - Key to look up
+#
+# Returns: Value for that key, undef if it is not present
 sub FETCH {
     my ($self, $key) = @_;
-    return if $self->{DELETED}{$key};
-    return $self->{OVERRIDE}{$key} if exists $self->{OVERRIDE}{$key};
-    for my $source (@{ $self->{SOURCES} }) {
-        return $source->{$key} if defined $source->{$key};
+    if ($self->{DELETED}{$key}) {
+        return;
+    } elsif (exists($self->{OVERRIDE}{$key})) {
+        return $self->{OVERRIDE}{$key};
+    } else {
+        for my $source ($self->{SOURCES}->@*) {
+            if (defined($source->{$key})) {
+                return $source->{$key};
+            }
+        }
+        return;
     }
-    return;
 }
 
+# Store a value.  This goes into the override hash, which is checked before
+# any of the underlying data sources.
+#
+# $key   - Key to store a value for
+# $value - Value to store
 sub STORE {
     my ($self, $key, $value) = @_;
     delete $self->{DELETED}{$key};
     $self->{OVERRIDE}{$key} = $value;
+    return;
 }
 
+# Delete a key.  The key is flagged in the deleted hash, which ensures that
+# undef will be returned for any future retrieval.  Dropping the override
+# value isn't required for currect future FETCH behavior, but it drops the
+# reference so that memory can be released.
+#
+# $key - Key to delete
 sub DELETE {
     my ($self, $key) = @_;
     delete $self->{OVERRIDE}{$key};
     $self->{DELETED}{$key} = 1;
+    return;
 }
 
+# Clear the hash.  Removes all sources and all overrides and resets any
+# iteration.
 sub CLEAR {
     my ($self) = @_;
     $self->{DELETED} = {};
     $self->{OVERRIDE} = {};
     $self->{SOURCES} = [];
     $self->{EACH} = -1;
+    return;
 }
 
+# Return whether a key exists.
+#
 # This could throw an exception if any underlying source doesn't support
 # exists (like NDBM_File).
+#
+# $key - Key to query for existence
+#
+# Returns: True if the key exists, false otherwise
 sub EXISTS {
     my ($self, $key) = @_;
-    return if exists $self->{DELETED}{$key};
-    for my $source ($self->{OVERRIDE}, @{ $self->{SOURCES} }) {
-        return 1 if exists $source->{$key};
+    return if exists($self->{DELETED}{$key});
+    for my $source ($self->{OVERRIDE}, $self->{SOURCES}->@*) {
+        return 1 if exists($source->{$key});
     }
     return;
 }
 
+# Start an iteration.
+#
 # We have to reset the each counter on all hashes.  For tied hashes, we call
 # FIRSTKEY directly because it's potentially more efficient than calling keys
 # on the hash.
 sub FIRSTKEY {
     my ($self) = @_;
-    keys %{ $self->{OVERRIDE} };
-    for my $source (@{ $self->{SOURCES} }) {
-        my $tie = tied $source;
+    keys($self->{OVERRIDE}->%*);
+    for my $source ($self->{SOURCES}->@*) {
+        my $tie = tied($source);
         if ($tie) {
-            $tie->FIRSTKEY;
+            $tie->FIRSTKEY();
         } else {
-            keys %$source;
+            keys($source->%*);
         }
     }
     $self->{EACH} = -1;
-    return $self->NEXTKEY;
+    return $self->NEXTKEY();
 }
 
-# Walk the sources by calling each on each one in turn, skipping deleted
-# keys and keys shadowed by earlier hashes and using $self->{EACH} to
-# store the number of source we're at.
+# Iterate through the hashes.
+#
+# Walk the sources by calling each on each one in turn, skipping deleted keys
+# and keys shadowed by earlier hashes and using $self->{EACH} to store the
+# number of source we're at.
+#
+# Returns: Next key in iteration, or undef if sources are exhausted
+## no critic (Freenode::Each)
 sub NEXTKEY {
     my ($self) = @_;
-    my @result = ();
+
+    # EACH is the numeric index in the SOURCES list for the source we're
+    # currently calling each on, or -1 if we're just starting and thus
+    # operating on the OVERRIDE hash.
+    #
+    # We have to loop until we find the next value, which may take several
+    # iterations since keys could have been overridden by an earlier hash or
+    # deleted.
   SOURCE:
-    while (!@result && $self->{EACH} < @{ $self->{SOURCES} }) {
+    while ($self->{EACH} < $self->{SOURCES}->@*) {
+        my $key;
         if ($self->{EACH} == -1) {
-            @result = each %{ $self->{OVERRIDE} };
+            $key = each($self->{OVERRIDE}->%*);
         } else {
-            @result = each %{ $self->{SOURCES}[$self->{EACH}] };
+            $key = each($self->{SOURCES}[$self->{EACH}]->%*);
         }
-        if (@result && $self->{DELETED}{$result[0]}) {
-            undef @result;
-            next;
-        }
-        if (@result && $self->{EACH} > -1) {
-            my $key = $result[0];
-            if (exists $self->{OVERRIDE}{$key}) {
-                undef @result;
+
+        # If we got a valid result, we have to check against DELETED,
+        # OVERRIDE, and all earlier sources before returning it.
+        if (defined($key)) {
+            if ($self->{DELETED}{$key}) {
                 next;
-            }
-            for (my $index = $self->{EACH} - 1; $index >= 0; $index--) {
-                if (defined $self->{SOURCES}[$index]{$key}) {
-                    undef @result;
-                    next SOURCE;
+            } elsif ($self->{EACH} >= 0 && exists($self->{OVERRIDE}{$key})) {
+                next;
+            } elsif ($self->{EACH} > 0) {
+                for my $index (reverse(0 .. $self->{EACH} - 1)) {
+                    if (defined($self->{SOURCES}[$index]{$key})) {
+                        next SOURCE;
+                    }
                 }
             }
+            return $key;
         }
-        return (wantarray ? @result : $result[0]) if @result;
         $self->{EACH}++;
     }
+
+    # We have exhausted all of the sources.
     return;
 }
+## use critic
 
 ##############################################################################
 # Module return value and documentation
@@ -307,17 +374,15 @@ same arguments as the initial tie() and interprets them the same way.
 
 =over 4
 
-=item Can't open file %s: %s
+=item invalid source type %s
 
-Tie::ShadowHash was given a file name to use as a source, but when it
-tried to open that file, the open failed with that system error message.
-
-=item Invalid source type %s
-
-Tie::Shadowhash was given a tagged data source of an unknown type.  The
-only currently supported tagged data source is C<text>.
+Tie::ShadowHash was given a tagged data source of an unknown type.  The only
+currently supported tagged data source is C<text>.
 
 =back
+
+If given a file name as a data source, Tie::ShadowHash will also raise an
+L<autodie> exception if there is a problem with opening or reading that file.
 
 =head1 CAVEATS
 
