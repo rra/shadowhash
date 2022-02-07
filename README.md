@@ -1,5 +1,7 @@
 # Tie::ShadowHash
 
+[![Build
+status](https://github.com/rra/shadowhash/workflows/build/badge.svg)](https://github.com/rra/shadowhash/actions)
 [![CPAN
 version](https://img.shields.io/cpan/v/Tie-ShadowHash)](https://metacpan.org/release/Tie-ShadowHash)
 [![License](https://img.shields.io/cpan/l/Tie-ShadowHash)](https://github.com/rra/shadowhash/blob/master/LICENSE)

@@ -44,6 +44,8 @@ support:
 vcs:
   browse: https://git.eyrie.org/?p=perl/shadowhash.git
   github: rra/shadowhash
+  status:
+    workflow: build
   type: Git
   url: https://git.eyrie.org/git/perl/shadowhash.git
 
