@@ -220,7 +220,6 @@ sub FIRSTKEY {
 # number of source we're at.
 #
 # Returns: Next key in iteration, or undef if sources are exhausted
-## no critic (Community::Each)
 sub NEXTKEY {
     my ($self) = @_;
 
@@ -234,11 +233,14 @@ sub NEXTKEY {
   SOURCE:
     while ($self->{EACH} < $self->{SOURCES}->@*) {
         my $key;
+
+        ## no critic (Community::Each)
         if ($self->{EACH} == -1) {
             $key = each($self->{OVERRIDE}->%*);
         } else {
             $key = each($self->{SOURCES}[$self->{EACH}]->%*);
         }
+        ## use critic
 
         # If we got a valid result, we have to check against DELETED,
         # OVERRIDE, and all earlier sources before returning it.
@@ -262,7 +264,6 @@ sub NEXTKEY {
     # We have exhausted all of the sources.
     return;
 }
-## use critic
 
 ##############################################################################
 # Module return value and documentation
