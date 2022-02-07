@@ -220,10 +220,10 @@ DBM Allbery
 
     use Tie::ShadowHash;
     use DB_File;
-    tie (%db, 'DB_File', 'file.db');
-    $obj = tie (%hash, 'Tie::ShadowHash', \%db, "otherdata.txt");
+    tie(my %db, 'DB_File', 'file.db');
+    my $obj = tie(my %hash, 'Tie::ShadowHash', \%db, 'otherdata.txt');
 
-    # Accesses search %db first, then the hashed "otherdata.txt".
+    # Accesses search %db first, then the hashed otherdata.txt.
     print "$hash{key}\n";
 
     # Changes override data sources, but don't change them.
@@ -231,21 +231,21 @@ DBM Allbery
     delete $hash{bar};
 
     # Add more data sources on the fly.
-    %extra = (fee => 'fi', foe => 'fum');
-    $obj->add (\%extra);
+    my %extra = (fee => 'fi', foe => 'fum');
+    $obj->add(\%extra);
 
     # Add a text file as a data source, taking the first "word" up
     # to whitespace on each line as the key and the rest of the line
     # as the value.
-    $split = sub { split (' ', $_[0], 2) };
-    $obj->add ([text => "pairs.txt", $split]);
+    my $split = sub { my ($line) = @_; split(q{ }, $line, 2) };
+    $obj->add([text => "pairs.txt", $split]);
 
     # Add a text file as a data source, splitting each line on
     # whitespace and taking the first "word" to be the key and an
     # anonymous array consisting of the remaining words to be the
     # data.
-    $split = sub { split (' ', $_[0]) };
-    $obj->add ([text => "triples.txt", $split]);
+    $split = sub { my ($line) = @_; split(q{ }, $line) };
+    $obj->add([text => "triples.txt", $split]);
 
 =head1 DESCRIPTION
 
