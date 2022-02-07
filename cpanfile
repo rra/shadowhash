@@ -1,6 +1,6 @@
 # -*- perl -*-
 
-on 'configure' -> sub {
+on 'configure' => sub {
     requires 'Module::Build', '0.28';
 };
 
