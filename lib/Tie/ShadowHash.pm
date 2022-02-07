@@ -365,7 +365,7 @@ under the same terms as Perl itself.
 L<perltie>
 
 The current version of this module is always available from its web site
-at L<http://www.eyrie.org/~eagle/software/shadowhash/>.
+at L<https://www.eyrie.org/~eagle/software/shadowhash/>.
 
 =cut
 
