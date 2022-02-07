@@ -1,16 +1,13 @@
 # Tie::ShadowHash -- Merge multiple data sources into a hash.
 #
-# Copyright 1999, 2002, 2010, 2022 by Russ Allbery <rra@cpan.org>
-#
-# This program is free software; you may redistribute it and/or modify it
-# under the same terms as Perl itself.
-#
 # This module combines multiple sources of data into a single tied hash, so
 # that they can all be queried simultaneously, the source of any given
 # key-value pair irrelevant to the client script.  Data sources are searched
 # in the order that they're added to the shadow hash.  Changes to the hashed
 # data aren't propagated back to the actual data files; instead, they're saved
 # within the tied hash and override any data obtained from the data sources.
+#
+# SPDX-License-Identifier: GPL-1.0-or-later OR Artistic-1.0-Perl
 
 ##############################################################################
 # Modules and declarations
@@ -361,7 +358,7 @@ Russ Allbery <rra@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-Copyright 1999, 2002, 2010 by Russ Allbery <rra@cpan.org>
+Copyright 1999, 2002, 2010, 2022 Russ Allbery <rra@cpan.org>
 
 This program is free software; you may redistribute it and/or modify it
 under the same terms as Perl itself.
@@ -374,3 +371,7 @@ The current version of this module is always available from its web site
 at L<http://www.eyrie.org/~eagle/software/shadowhash/>.
 
 =cut
+
+# Local Variables:
+# copyright-at-end-flag: t
+# End:
