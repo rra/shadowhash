@@ -320,41 +320,58 @@ is accessed, the data structures managed by that shadow hash are searched in
 order they were added for that key.  This allows the rest of a program simple
 and convenient access to a disparate set of data sources.
 
-Tie::ShadowHash can handle anything that looks like a hash; just give it a
-reference as one of the additional arguments to tie().  This includes other
-tied hashes, so you can include DB and DBM files as data sources for a shadow
-hash.  If given a plain file name instead of a reference, it will build a hash
-to use internally, with each chomped line of the file being the key and the
-number of times that line is seen in the file being the value.
-
-Tie::Shadowhash also supports special tagged data sources that can take
-options specifying their behavior.  The only tagged data source currently
-supported is C<text>, which takes a file name of a text file and a reference
-to a sub.  The sub is called for every line of the file, with that line as an
-argument, and is expected to return a list.  The first element of the list
-will be the key, and the second and subsequent elements will be the value or
-values.  If there is more than one value, the value stored in the hash and
-associated with that key is an anonymous array containing all of them.
-
-Tagged data sources are distinguished from normal data sources by passing them
-to tie() (or to add() -- see below) as an anonymous array.  The first element
-is the data source tag and the remaining elements are arguments for that data
-source.  For a text data source, see the usage summary above for examples.
-
 The shadow hash can be modified, and the modifications override the data
 sources, but modifications aren't propagated back to the data sources.  In
 other words, the shadow hash treats all data sources as read-only and saves
-your modifications only in internal memory.  This lets you make changes to the
-shadow hash for the rest of your program without affecting the underlying data
-in any way (and this behavior is the main reason why this is called a shadow
-hash).
+your modifications in an overlay in memory.  This lets you make changes to the
+shadow hash and have them reflected later in your program without affecting
+the underlying data in any way.  This behavior is the reason why it is called
+a shadow hash.
 
-If the shadow hash is cleared, by assigning the empty list to it, by
-explicitly calling CLEAR(), or by some other method, all data sources are
-dropped from the shadow hash.  There is no other way of removing a data source
-from a shadow hash after it's been added (you can, of course, always untie the
-shadow hash and dispose of the underlying object if you saved it to destroy
-the shadow hash completely).
+=head1 Constructing the hash
+
+Tie::ShadowHash takes one or more underlying data sources as additional
+arguments to tie().  Data sources can also be added later by calling the add()
+method on the object returned by tie().
+
+A data source can be anything that looks like a hash.  This includes other
+tied hashes, so you can include DB and DBM files as data sources for a shadow
+hash.
+
+If the data source is a scalar string instead of a hash reference,
+Tie::ShadowHash will treat that string as a file name and construct a hash
+from it.  Each chomped line of the file will be a key, and the number of times
+that line is seen in the file will be the corresponding value.
+
+Tie::Shadowhash also supports special tagged data sources that can take
+options specifying their behavior.  Tagged data sources are distinguished from
+normal data sources by passing them to tie() or add() as an array reference.
+The first element is the data source tag and the remaining elements are
+arguments for that data source.  The following tagged data sources are
+supported:
+
+=over 4
+
+=item C<text>
+
+The arguments must be the file name of a text file and a reference to a sub.
+The sub is called for every line of the file, with that line as an argument,
+and is expected to return a list.  The first element of the list will be the
+key, and the second and subsequent elements will be the value or values.  If
+there is more than one value, the value stored in the hash and associated with
+that key is an anonymous array containing all of them.  See the usage summary
+above for examples.
+
+=back
+
+=head1 Clearing the hash
+
+If the shadow hash is cleared by assigning the empty list to it, calling
+CLEAR(), or some other method, all data sources are dropped from the shadow
+hash.  There is no other way of removing a data source from a shadow hash
+after it's been added (you can, of course, always untie the shadow hash and
+dispose of the underlying object if you saved it to destroy the shadow hash
+completely).
 
 =head1 INSTANCE METHODS
 
@@ -383,6 +400,15 @@ If given a file name as a data source, Tie::ShadowHash will also raise an
 L<autodie> exception if there is a problem with opening or reading that file.
 
 =head1 CAVEATS
+
+=head2 Iterating
+
+If you iterate through the keys of a shadow hash, it in turn will iterate
+through the keys of the underlying hash.  Since Perl stores only one iterator
+position per hash, this means the shadow hash will reset any existing iterator
+positions in its underlying hashes.  Iterating through both the shadow hash
+and one of its underlying hashes at the same time is undefined and will
+probably not do what you expect.
 
 =head2 untie
 
