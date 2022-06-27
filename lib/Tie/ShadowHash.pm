@@ -314,50 +314,47 @@ DBM Allbery
 
 =head1 DESCRIPTION
 
-This module merges together multiple sets of data in the form of hashes
-into a data structure that looks to Perl like a single simple hash.  When
-that hash is accessed, the data structures managed by that shadow hash are
-searched in order they were added for that key.  This allows the rest of a
-program simple and convenient access to a disparate set of data sources.
+This module merges together multiple sets of data in the form of hashes into a
+data structure that looks to Perl like a single simple hash.  When that hash
+is accessed, the data structures managed by that shadow hash are searched in
+order they were added for that key.  This allows the rest of a program simple
+and convenient access to a disparate set of data sources.
 
 Tie::ShadowHash can handle anything that looks like a hash; just give it a
-reference as one of the additional arguments to tie().  This includes
-other tied hashes, so you can include DB and DBM files as data sources for
-a shadow hash.  If given a plain file name instead of a reference, it will
-build a hash to use internally, with each chomped line of the file being
-the key and the number of times that line is seen in the file being the
-value.
+reference as one of the additional arguments to tie().  This includes other
+tied hashes, so you can include DB and DBM files as data sources for a shadow
+hash.  If given a plain file name instead of a reference, it will build a hash
+to use internally, with each chomped line of the file being the key and the
+number of times that line is seen in the file being the value.
 
 Tie::Shadowhash also supports special tagged data sources that can take
 options specifying their behavior.  The only tagged data source currently
-supported is C<text>, which takes a file name of a text file and a
-reference to a sub.  The sub is called for every line of the file, with
-that line as an argument, and is expected to return a list.  The first
-element of the list will be the key, and the second and subsequent
-elements will be the value or values.  If there is more than one value,
-the value stored in the hash and associated with that key is an anonymous
-array containing all of them.
+supported is C<text>, which takes a file name of a text file and a reference
+to a sub.  The sub is called for every line of the file, with that line as an
+argument, and is expected to return a list.  The first element of the list
+will be the key, and the second and subsequent elements will be the value or
+values.  If there is more than one value, the value stored in the hash and
+associated with that key is an anonymous array containing all of them.
 
-Tagged data sources are distinguished from normal data sources by passing
-them to tie() (or to add() -- see below) as an anonymous array.  The first
-element is the data source tag and the remaining elements are arguments
-for that data source.  For a text data source, see the usage summary above
-for examples.
+Tagged data sources are distinguished from normal data sources by passing them
+to tie() (or to add() -- see below) as an anonymous array.  The first element
+is the data source tag and the remaining elements are arguments for that data
+source.  For a text data source, see the usage summary above for examples.
 
 The shadow hash can be modified, and the modifications override the data
 sources, but modifications aren't propagated back to the data sources.  In
-other words, the shadow hash treats all data sources as read-only and
-saves your modifications only in internal memory.  This lets you make
-changes to the shadow hash for the rest of your program without affecting
-the underlying data in any way (and this behavior is the main reason why
-this is called a shadow hash).
+other words, the shadow hash treats all data sources as read-only and saves
+your modifications only in internal memory.  This lets you make changes to the
+shadow hash for the rest of your program without affecting the underlying data
+in any way (and this behavior is the main reason why this is called a shadow
+hash).
 
 If the shadow hash is cleared, by assigning the empty list to it, by
 explicitly calling CLEAR(), or by some other method, all data sources are
-dropped from the shadow hash.  There is no other way of removing a data
-source from a shadow hash after it's been added (you can, of course,
-always untie the shadow hash and dispose of the underlying object if you
-saved it to destroy the shadow hash completely).
+dropped from the shadow hash.  There is no other way of removing a data source
+from a shadow hash after it's been added (you can, of course, always untie the
+shadow hash and dispose of the underlying object if you saved it to destroy
+the shadow hash completely).
 
 =head1 INSTANCE METHODS
 
@@ -365,9 +362,9 @@ saved it to destroy the shadow hash completely).
 
 =item add(SOURCE [, SOURCE ...])
 
-Adds the given sources to an existing shadow hash.  This method can be
-called on the object returned by the initial tie() call.  It takes the
-same arguments as the initial tie() and interprets them the same way.
+Adds the given sources to an existing shadow hash.  This method can be called
+on the object returned by the initial tie() call.  It takes the same arguments
+as the initial tie() and interprets them the same way.
 
 =back
 
@@ -387,33 +384,31 @@ L<autodie> exception if there is a problem with opening or reading that file.
 
 =head1 CAVEATS
 
-It's worth paying very careful attention to L<perltie/"The untie Gotcha">
-when using this module.  It's also important to be careful about what you
-do with tied hashes that are included in a shadow hash.  Tie::ShadowHash
-stores a reference to such arrays; if you untie them out from under a
-shadow hash, you may not get the results you expect.  Remember that if you
-put something in a shadow hash, you'll need to clean out the shadow hash
-as well as everything else that references a variable if you want to free
-it completely.
+It's worth paying very careful attention to L<perltie/"The untie Gotcha"> when
+using this module.  It's also important to be careful about what you do with
+tied hashes that are included in a shadow hash.  Tie::ShadowHash stores a
+reference to such arrays; if you untie them out from under a shadow hash, you
+may not get the results you expect.  Remember that if you put something in a
+shadow hash, you'll need to clean out the shadow hash as well as everything
+else that references a variable if you want to free it completely.
 
-Not all tied hashes implement EXISTS; in particular, ODBM_File, NDBM_File,
-and some old versions of GDBM_File don't, and therefore AnyDBM_File
-doesn't either.  Calling exists on a shadow hash that includes one of
-those tied hashes as a data source may therefore result in an exception.
-Tie::ShadowHash doesn't use exists except to implement the EXISTS method
-because of this.
+Not all tied hashes implement EXISTS; in particular, ODBM_File, NDBM_File, and
+some old versions of GDBM_File don't, and therefore AnyDBM_File doesn't
+either.  Calling exists on a shadow hash that includes one of those tied
+hashes as a data source may therefore result in an exception.  Tie::ShadowHash
+doesn't use exists except to implement the EXISTS method because of this.
 
-Because it can't use EXISTS due to the above problem, Tie::ShadowHash
-cannot correctly distinguish between a non-existent key and an existing
-key associated with an undefined value.  This isn't a large problem, since
-many tied hashes can't store undefined values anyway, but it means that if
-one of your data sources contains a given key associated with an undefined
-value and one of your later data sources contains the same key but with a
-defined value, when the shadow hash is accessed using that key, it will
-return the first defined value it finds.  This is an exception to the
-normal rule that all data sources are searched in order and the value
-returned by an access is the first value found.  (Tie::ShadowHash does
-correctly handle undefined values stored directly in the shadow hash.)
+Because it can't use EXISTS due to the above problem, Tie::ShadowHash cannot
+correctly distinguish between a non-existent key and an existing key
+associated with an undefined value.  This isn't a large problem, since many
+tied hashes can't store undefined values anyway, but it means that if one of
+your data sources contains a given key associated with an undefined value and
+one of your later data sources contains the same key but with a defined value,
+when the shadow hash is accessed using that key, it will return the first
+defined value it finds.  This is an exception to the normal rule that all data
+sources are searched in order and the value returned by an access is the first
+value found.  (Tie::ShadowHash does correctly handle undefined values stored
+directly in the shadow hash.)
 
 =head1 AUTHOR
 
