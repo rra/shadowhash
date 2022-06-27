@@ -25,7 +25,7 @@ copyrights:
     years: 1999, 2002, 2010, 2022
 
 build:
-  type: ExtUtils::MakeMaker
+  type: Module::Build
 distribution:
   cpan: Tie-ShadowHash
   packaging:

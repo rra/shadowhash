@@ -51,17 +51,17 @@ The only requirement for this module is Perl 5.024 or later.
 
 ## Building and Installation
 
-Tie::ShadowHash uses ExtUtils::MakeMaker and can be installed using the
-same process as any other ExtUtils::MakeMaker module:
+Tie::ShadowHash uses Module::Build and can be installed using the same
+process as any other Module::Build module:
 
 ```
-    perl Makefile.PL
-    make
-    make install
+    perl Build.PL
+    ./Build
+    ./Build install
 ```
 
-You'll probably need to do the last as root unless you're installing into
-a local Perl module tree in your home directory.
+You will have to run the last command as root unless you're installing
+into a local Perl module tree in your home directory.
 
 ## Testing
 
@@ -69,13 +69,13 @@ Tie::ShadowHash comes with a test suite, which you can run after building
 with:
 
 ```
-    make test
+    ./Build test
 ```
 
-If a test vails, you can run a single test with verbose output via:
+If a test fails, you can run a single test with verbose output via:
 
 ```
-    prove -vb <path-to-test>
+    ./Build test --test_files <path-to-test>
 ```
 
 The following additional Perl modules will be used by the test suite if
