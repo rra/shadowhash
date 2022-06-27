@@ -8,6 +8,7 @@ on 'test' => sub {
     suggests 'Devel::Cover';
     suggests 'Perl::Critic::Freenode';
     suggests 'Test::CPAN::Changes';
+    suggests 'Test::Kwalitee';
     suggests 'Test::MinimumVersion';
     suggests 'Test::Perl::Critic';
     suggests 'Test::Pod';

@@ -72,6 +72,7 @@ TESTING
   * Devel::Cover
   * Perl::Critic::Freenode
   * Test::CPAN::Changes (part of CPAN-Changes)
+  * Test::Kwalitee
   * Test::MinimumVersion
   * Test::Perl::Critic
   * Test::Pod
