@@ -33,4 +33,3 @@ t/style/kwalitee.t
 t/style/minimum-version.t
 t/style/obsolete-strings.t
 t/style/strict.t
-TODO

@@ -15,7 +15,7 @@ format: v1
 
 name: Tie::ShadowHash
 maintainer: Russ Allbery <rra@cpan.org>
-version: '1.01'
+version: '2.00'
 synopsis: Merge multiple data sources into a hash with overrides
 
 license:

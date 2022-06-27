@@ -13,7 +13,7 @@
 # Modules and declarations
 ##############################################################################
 
-package Tie::ShadowHash 1.00;
+package Tie::ShadowHash 2.00;
 
 use 5.024;
 use autodie;
