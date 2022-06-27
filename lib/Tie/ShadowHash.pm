@@ -384,13 +384,16 @@ L<autodie> exception if there is a problem with opening or reading that file.
 
 =head1 CAVEATS
 
-It's worth paying very careful attention to L<perltie/"The untie Gotcha"> when
-using this module.  It's also important to be careful about what you do with
-tied hashes that are included in a shadow hash.  Tie::ShadowHash stores a
-reference to such arrays; if you untie them out from under a shadow hash, you
-may not get the results you expect.  Remember that if you put something in a
-shadow hash, you'll need to clean out the shadow hash as well as everything
-else that references a variable if you want to free it completely.
+=head2 untie
+
+If you are including tied hashes in a shadow hash, read L<perltie/The "untie"
+Gotcha>. Tie::ShadowHash stores a reference to those hashes.  If you untie
+them out from under a shadow hash, you may not get the results you expect.  If
+you put something in a shadow hash, you'll need to clean out the shadow hash
+as well as everything else that references a variable if you want to free it
+completely.
+
+=head2 EXISTS
 
 Not all tied hashes implement EXISTS; in particular, ODBM_File, NDBM_File, and
 some old versions of GDBM_File don't, and therefore AnyDBM_File doesn't
@@ -409,6 +412,18 @@ defined value it finds.  This is an exception to the normal rule that all data
 sources are searched in order and the value returned by an access is the first
 value found.  (Tie::ShadowHash does correctly handle undefined values stored
 directly in the shadow hash.)
+
+=head2 SCALAR
+
+Tie::ShadowHash does not implement SCALAR and therefore relies on the default
+Perl behavior, which is somewhat complex.  See L<perltie/SCALAR this> for a
+partial description of this logic, which includes the note that Perl may
+incorrectly return true in a scalar context if the hash is cleared by
+repeatedly calling DELETE until it is empty.
+
+SCALAR on a shadow hash does not return a count of keys the way that it does
+for an untied hash.  The value returned is either true or false and carries no
+other meaning.
 
 =head1 AUTHOR
 

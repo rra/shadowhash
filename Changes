@@ -4,6 +4,7 @@
 
  - Remove the new() method, since tie should always be used instead.
  - Convert the build system to Module::Build.
+ - Document the behavior of SCALAR.
 
 1.00 - 2010-04-03
 
