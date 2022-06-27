@@ -33,7 +33,8 @@ distribution:
       package: libtie-shadowhash-perl
       summary: |
         Tie::ShadowHash is packaged in Debian 6.0 (squeeze) and later as
-        libtie-shadowhash-perl.
+        libtie-shadowhash-perl.  Thanks to Stefan Hornburg (Racke) for the
+        packaging.
   section: perl
   tarname: Tie-ShadowHash
   version: tie-shadowhash
@@ -67,11 +68,11 @@ blurb: |
   are not changed.
 
 description: |
-  If you have a bunch of key/value data sources in the form of Perl hashes,
-  tied hashes (of whatever type, including on-disk databases tied with
-  DB_File, GDBM_File, or similar modules), or text files that you want to turn
-  into hashes, and you want to be able to query all of those sources of data
-  at once for a particular key without having to check each one of them
+  If you have several key/value data sources in the form of Perl hashes, tied
+  hashes (of whatever type, including on-disk databases tied with DB_File,
+  GDBM_File, or similar modules), or text files that you want to turn into
+  hashes, and you want to be able to query all of those sources of data at
+  once for a particular key without having to check each one of them
   individually, this module may be what you're looking for.  If you want to
   use a hash-like data source, even just one, but make modifications to its
   data over the course of your program that override its contents while your
@@ -79,17 +80,16 @@ description: |
   may be what you're looking for.
 
   Tie::ShadowHash lets you create a "shadow hash" that looks like a regular
-  Perl hash to your program but behind the scenes queries a whole list of data
-  sources.  All the data sources underneath have to also behave like Perl
-  hashes, but that's the only constraint.  They can be regular Perl hashes or
-  other tied hashes, including tied DB_File or GDBM_File hashes or the like to
-  access on-disk databases.  All data sources are treated as read-only;
-  modifications to any data is stored in the shadow hash itself, and
-  subsequent accesses reflect any modifications, but none of the data sources
-  are changed.
+  Perl hash to your program but, behind the scenes, queries a list of data
+  sources.  All the data sources must also behave like Perl hashes, but that's
+  the only constraint.  They can be regular Perl hashes or other tied hashes,
+  including tied DB_File or GDBM_File hashes or the like to access on-disk
+  databases.  All data sources are treated as read-only; modifications to any
+  data is stored in the shadow hash itself, and subsequent accesses reflect
+  any modifications, but none of the data sources are changed.
 
 requirements: |
-  The only requirement for this module is Perl 5.006 or later.
+  The only requirement for this module is Perl 5.024 or later.
 
 test:
   lancaster: true
@@ -112,7 +112,6 @@ test:
 sections:
   - title: Thanks
     body: |
-      To Chris Nandor <pudge@pobox.com> for testing this module on the Mac,
-      pointing out that SDBM_File wasn't available there, mentioning that SDBM
-      was byte-order-dependent anyway, and suggesting using AnyDBM_File
-      instead.
+      To Chris Nandor for testing this module on the Mac, pointing out that
+      SDBM_File wasn't available there, mentioning that SDBM was
+      byte-order-dependent anyway, and suggesting using AnyDBM_File instead.

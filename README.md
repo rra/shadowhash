@@ -24,7 +24,7 @@ objects are not changed.
 
 ## Description
 
-If you have a bunch of key/value data sources in the form of Perl hashes,
+If you have several key/value data sources in the form of Perl hashes,
 tied hashes (of whatever type, including on-disk databases tied with
 DB_File, GDBM_File, or similar modules), or text files that you want to
 turn into hashes, and you want to be able to query all of those sources of
@@ -36,18 +36,18 @@ program runs but which don't have any permanent effect on it, this module
 may be what you're looking for.
 
 Tie::ShadowHash lets you create a "shadow hash" that looks like a regular
-Perl hash to your program but behind the scenes queries a whole list of
-data sources.  All the data sources underneath have to also behave like
-Perl hashes, but that's the only constraint.  They can be regular Perl
-hashes or other tied hashes, including tied DB_File or GDBM_File hashes or
-the like to access on-disk databases.  All data sources are treated as
-read-only; modifications to any data is stored in the shadow hash itself,
-and subsequent accesses reflect any modifications, but none of the data
+Perl hash to your program but, behind the scenes, queries a list of data
+sources.  All the data sources must also behave like Perl hashes, but
+that's the only constraint.  They can be regular Perl hashes or other tied
+hashes, including tied DB_File or GDBM_File hashes or the like to access
+on-disk databases.  All data sources are treated as read-only;
+modifications to any data is stored in the shadow hash itself, and
+subsequent accesses reflect any modifications, but none of the data
 sources are changed.
 
 ## Requirements
 
-The only requirement for this module is Perl 5.006 or later.
+The only requirement for this module is Perl 5.024 or later.
 
 ## Building and Installation
 
@@ -102,9 +102,9 @@ value.
 
 ## Thanks
 
-To Chris Nandor <pudge@pobox.com> for testing this module on the Mac,
-pointing out that SDBM_File wasn't available there, mentioning that SDBM
-was byte-order-dependent anyway, and suggesting using AnyDBM_File instead.
+To Chris Nandor for testing this module on the Mac, pointing out that
+SDBM_File wasn't available there, mentioning that SDBM was
+byte-order-dependent anyway, and suggesting using AnyDBM_File instead.
 
 ## Support
 
