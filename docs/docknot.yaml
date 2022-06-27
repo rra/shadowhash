@@ -54,9 +54,6 @@ docs:
   api:
     - name: docs
       title: Tie::ShadowHash
-  developer:
-    - name: todo
-      title: To-do list
 
 blurb: |
   Tie::ShadowHash is a Perl module that lets you stack together multiple
