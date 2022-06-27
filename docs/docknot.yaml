@@ -51,9 +51,9 @@ vcs:
   url: https://git.eyrie.org/git/perl/shadowhash.git
 
 docs:
-  api:
+  user:
     - name: docs
-      title: Tie::ShadowHash
+      title: Module documentation
 
 blurb: |
   Tie::ShadowHash is a Perl module that lets you stack together multiple
