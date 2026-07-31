@@ -6,7 +6,7 @@
 # which can be found at <https://www.eyrie.org/~eagle/software/rra-c-util/>.
 #
 # Written by Russ Allbery <eagle@eyrie.org>
-# Copyright 2022 Russ Allbery <eagle@eyrie.org>
+# Copyright 2022, 2024 Russ Allbery <eagle@eyrie.org>
 #
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the "Software"),
@@ -28,8 +28,7 @@
 #
 # SPDX-License-Identifier: MIT
 
-use 5.010;
-use strict;
+use 5.012;
 use warnings;
 
 use lib 't/lib';
@@ -45,6 +44,12 @@ skip_unless_author('Distribution style tests');
 use_prereq('Test::Kwalitee', 'kwalitee_ok');
 
 # Do the testing.  Disable testing for use strict, since that's done as part
-# of a separate test.
-kwalitee_ok(qw(-use_strict));
+# of a separate test.  Disable testing for META.yml if it's not present, since
+# it's generated as part of the distribution process but isn't normally
+# present in a development tree.
+my @options = qw(-use_strict);
+if (!-e 'META.yml') {
+    push(@options, '-has_meta_yml');
+}
+kwalitee_ok(@options);
 done_testing();
